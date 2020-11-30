@@ -1,0 +1,12 @@
+# this is a comment
+drop *
+keep run 
+keep luminosityBlock
+keep event
+keep HTXS*
+keep *Electron*
+keep *Jet*
+keep genWeight
+keep LHEWeight_originalXWGTUP
+keep Pileup*
+keep L1PreFiringWeight*
