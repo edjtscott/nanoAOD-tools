@@ -5,8 +5,12 @@ class VariableController():
         assert isinstance(orders,list)
         self.orders = orders
         self.objectVariables = ['Mass','Pt','Eta','Phi']
-        self.electronVariables = ['IDMVA']
+        self.electronVariables = ['IDMVA','sigmaE']
         self.jetVariables = ['QGL','ID','PUJID']
+        self.eventVariables = ['dielectronMass','dielectronPt','dielectronEta','dielectronPhi','dielectronCosPhi','dielectronSigmaMoM',
+                               'dijetMass','dijetPt','dijetEta','dijetPhi','dijetAbsDEta','dijetAbsDPhiTrunc','dijetMinDRJetEle','dijetCentrality',
+                               'higgssystemMass','higgssystemPt','higgssystemEta','higgssystemPhi'
+                              ]
 
     def allFloatNames(self):
         floats = []
@@ -18,6 +22,8 @@ class VariableController():
                floats.append('%sElectron%s'%(order,var))
             for var in self.jetVariables:
                floats.append('%sJet%s'%(order,var))
+        for var in self.eventVariables:
+           floats.append('%s'%(var))
         return floats
 
     def allIntNames(self):

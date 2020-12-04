@@ -10,3 +10,5 @@ keep genWeight
 keep LHEWeight_originalXWGTUP
 keep Pileup*
 keep L1PreFiringWeight*
+drop HLT_*
+drop L1_*
