@@ -64,7 +64,7 @@ class vbfHeeProducer(Module):
     def selectElectron(self, ele):
         if not ele.mvaFall17V2Iso_WP90: return False
         if not abs(ele.eta) < 2.5: return False
-        if abs(ele.eta) > 1.44 and abs(ele.eta) > 1.57: return False
+        if abs(ele.eta) > 1.44 and abs(ele.eta) < 1.57: return False
         return True
 
     def selectJet(self, jet):
@@ -134,7 +134,7 @@ class vbfHeeProducer(Module):
             self.out.fillBranch('dielectronEta', dielectron.Eta())
             self.out.fillBranch('dielectronPhi', dielectron.Phi())
             self.out.fillBranch('dielectronCosPhi', dielectronCosPhi)
-            self.out.fillBranch('dielectronCosPhi', dielectronSigmaMoM)
+            self.out.fillBranch('dielectronSigmaMoM', dielectronSigmaMoM)
 
             if leadJet is not None and subleadJet is not None:
                 ## dijet system - FIXME modify this to a dedicated fill function
@@ -145,8 +145,8 @@ class vbfHeeProducer(Module):
                     dijetDPhi = abs(dijetDPhi - 2 * pi)
                 dijetAbsDPhiTrunc = dijetDPhi if abs(dijetDPhi) < 3.1 else 3.1
                 dijetZep = abs( dielectron.Eta() - 0.5*(leadJet.eta+subleadJet.eta) )
-                dijetCentrality = exp( -4. * ((dijetZep/dijetAllDEta)**2) )
-                dijetMinDRJetEle = min( array( leadJet.DeltaR(leadEle),  leadJet.DeltaR(subleadEle), subleadJet.DeltaR(leadEle), subleadJet.DeltaR(subleadEle) ) )
+                dijetCentrality = exp( -4. * ((dijetZep/dijetAbsDEta)**2) )
+                dijetMinDRJetEle = min( array( [leadJet.DeltaR(leadEle),  leadJet.DeltaR(subleadEle), subleadJet.DeltaR(leadEle), subleadJet.DeltaR(subleadEle)] ) )
                 self.out.fillBranch('dijetMass', dijet.M())
                 self.out.fillBranch('dijetPt', dijet.Pt())
                 self.out.fillBranch('dijetEta', dijet.Eta())

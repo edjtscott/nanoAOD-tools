@@ -21,7 +21,7 @@ from PhysicsTools.NanoAODTools.postprocessing.modules.common.muonScaleResProduce
 #             && Entry$ < 10'''
 
 selection='''Sum$(Electron_pt > 25 && abs(Electron_eta<2.5)) > 1
-             && Entry$ < 10'''
+             && Entry$ < 100'''
 
 #files=["/hadoop/cms/store/user/hmei/nanoaod_runII/HHggtautau/HHggtautau_Era2018_private_v2_20201005/test_nanoaod_1.root"]
 files=["root://cms-xrd-global.cern.ch//store/mc/RunIISummer19UL17NanoAOD/GluGluHToEE_M125_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/106X_mc2017_realistic_v6-v1/00000/D1F68AEE-C601-1B43-8C4E-C2BEA41A5A45.root"]
