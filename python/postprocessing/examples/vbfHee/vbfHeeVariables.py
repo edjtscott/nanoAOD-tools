@@ -5,8 +5,8 @@ class VariableController():
         assert isinstance(orders,list)
         self.orders = orders
         self.objectVariables = ['Mass','Pt','Eta','Phi']
-        self.electronVariables = ['IDMVA','sigmaE']
-        self.jetVariables = ['QGL','ID','PUJID']
+        self.electronVariables = ['IDMVA','SigmaE']
+        self.jetVariables = ['QGL','ID','PUJID','PtJerUp','PtJerDown','PtJecUp','PtJecDown']
         self.eventVariables = ['dielectronMass','dielectronPt','dielectronEta','dielectronPhi','dielectronCosPhi','dielectronSigmaMoM',
                                'dijetMass','dijetPt','dijetEta','dijetPhi','dijetAbsDEta','dijetAbsDPhiTrunc','dijetMinDRJetEle','dijetCentrality',
                                'higgssystemMass','higgssystemPt','higgssystemEta','higgssystemPhi'

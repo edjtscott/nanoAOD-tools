@@ -1,0 +1,17 @@
+# this is a comment
+drop *
+keep run 
+keep luminosityBlock
+keep event
+keep HTXS*
+keep lead*
+keep sublead*
+keep subsublead*
+keep dielectron*
+keep dijet*
+keep higgssystem*
+keep genWeight
+keep LHEWeight_originalXWGTUP
+keep L1PreFiringWeight*
+drop HLT_*
+drop L1_*

@@ -40,6 +40,7 @@ class vbfHeeProducer(Module):
             self.out.fillBranch("%sElectronEta"%order, ele.eta)
             self.out.fillBranch("%sElectronPhi"%order, ele.phi)
             self.out.fillBranch("%sElectronIDMVA"%order, ele.mvaFall17V2Iso)
+            self.out.fillBranch("%sElectronSigmaE"%order, ele.energyErr)
         else:
             for var in self.variables.electronVariables:
                 self.out.fillBranch("%sElectron%s"%(order,var), -9999.)
@@ -55,6 +56,10 @@ class vbfHeeProducer(Module):
             self.out.fillBranch("%sJetID"%order, jet.jetId)
             self.out.fillBranch("%sJetPUJID"%order, jet.puId)
             self.out.fillBranch("%sJetQGL"%order, jet.qgl)
+            self.out.fillBranch("%sJetPtJerUp"%order, jet.pt_jerUp)
+            self.out.fillBranch("%sJetPtJerDown"%order, jet.pt_jerDown)
+            self.out.fillBranch("%sJetPtJecUp"%order, jet.pt_jesTotalUp)
+            self.out.fillBranch("%sJetPtJecDown"%order, jet.pt_jesTotalDown)
         else:
             for var in self.variables.jetVariables:
                 self.out.fillBranch("%sJet%s"%(order,var), -9999.)
@@ -68,16 +73,15 @@ class vbfHeeProducer(Module):
         return True
 
     def selectJet(self, jet):
-        selected = True
         if not jet.jetId >= 5.5: return False
-        if not jet.puId >= 3.5: return False
+        if not jet.puId >= 3.5: return False 
         if not abs(jet.eta) < 4.7: return False
         return True
 
     def analyze(self, event):
         """process event, return True (go to next module) or False (fail, go to next event)"""
 
-        ## electrons handling
+        ## electron handling
         electrons = Collection(event, "Electron")
         leadEle = None
         subleadEle = None
@@ -128,7 +132,7 @@ class vbfHeeProducer(Module):
             while dielectronDPhi > pi:
                 dielectronDPhi = abs(dielectronDPhi - 2 * pi)
             dielectronCosPhi= cos(dielectronDPhi)
-            dielectronSigmaMoM = sqrt( (leadEle.pt/leadEle.energyErr)**2 + (subleadEle.pt/subleadEle.energyErr)**2 )
+            dielectronSigmaMoM = sqrt( (leadEle.energyErr/leadEle.p4().E())**2 + (subleadEle.energyErr/subleadEle.p4().E())**2 )
             self.out.fillBranch('dielectronMass', dielectron.M())
             self.out.fillBranch('dielectronPt', dielectron.Pt())
             self.out.fillBranch('dielectronEta', dielectron.Eta())

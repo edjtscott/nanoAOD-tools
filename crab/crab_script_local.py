@@ -31,9 +31,10 @@ PrefireCorr2017 = lambda : PrefCorr('L1prefiring_jetpt_2017BtoF.root', 'L1prefir
 
 p=PostProcessor(".",files,       
                   selection.replace('\n',''),
-                  branchsel="keep_and_drop.txt",
-                  outputbranchsel="keep_and_drop.txt",
-                  modules=[puAutoWeight_2018(),jetmetUncertainties2018(),muonScaleRes2018(),vbfHeeModuleConstr()],
+                  branchsel="keep_and_drop_inputs.txt",
+                  outputbranchsel="keep_and_drop_outputs.txt",
+                  #modules=[puAutoWeight_2018(),jetmetUncertainties2018(),muonScaleRes2018(),vbfHeeModuleConstr()],
+                  modules=[puAutoWeight_2017(),jetmetUncertainties2017(),muonScaleRes2017(),vbfHeeModuleConstr()],
                   provenance=True)
 
 print p.branchsel._ops

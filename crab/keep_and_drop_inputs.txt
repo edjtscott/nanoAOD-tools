@@ -6,9 +6,6 @@ keep event
 keep HTXS*
 keep *Electron*
 keep *Jet*
-keep dielectron*
-keep dijet*
-keep higgssystem*
 keep genWeight
 keep LHEWeight_originalXWGTUP
 keep Pileup*
