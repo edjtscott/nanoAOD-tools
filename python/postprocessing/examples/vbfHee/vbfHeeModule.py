@@ -57,10 +57,16 @@ class vbfHeeProducer(Module):
             self.out.fillBranch("%sJetID"%order, jet.jetId)
             self.out.fillBranch("%sJetPUJID"%order, jet.puId)
             self.out.fillBranch("%sJetQGL"%order, jet.qgl)
-            self.out.fillBranch("%sJetPtJerUp"%order, jet.pt_jerUp)
-            self.out.fillBranch("%sJetPtJerDown"%order, jet.pt_jerDown)
-            self.out.fillBranch("%sJetPtJecUp"%order, jet.pt_jesTotalUp)
-            self.out.fillBranch("%sJetPtJecDown"%order, jet.pt_jesTotalDown)
+            if not self.isData:
+                self.out.fillBranch("%sJetPtJerUp"%order, jet.pt_jerUp)
+                self.out.fillBranch("%sJetPtJerDown"%order, jet.pt_jerDown)
+                self.out.fillBranch("%sJetPtJecUp"%order, jet.pt_jesTotalUp)
+                self.out.fillBranch("%sJetPtJecDown"%order, jet.pt_jesTotalDown)
+            else:
+                self.out.fillBranch("%sJetPtJerUp"%order, -9999.)
+                self.out.fillBranch("%sJetPtJerDown"%order, -9999.)
+                self.out.fillBranch("%sJetPtJecUp"%order, -9999.)
+                self.out.fillBranch("%sJetPtJecDown"%order, -9999.)
         else:
             for var in self.variables.jetVariables:
                 self.out.fillBranch("%sJet%s"%(order,var), -9999.)
