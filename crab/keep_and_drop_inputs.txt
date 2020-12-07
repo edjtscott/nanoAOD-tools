@@ -12,3 +12,5 @@ keep Pileup*
 keep L1PreFiringWeight*
 drop HLT_*
 drop L1_*
+keep HLT_Diphoton30*
+keep HLT_Ele32_WPTight_Gsf_L1DoubleEG

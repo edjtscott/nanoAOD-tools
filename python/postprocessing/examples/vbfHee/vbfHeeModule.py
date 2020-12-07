@@ -1,5 +1,6 @@
 from PhysicsTools.NanoAODTools.postprocessing.framework.datamodel import Collection
 from PhysicsTools.NanoAODTools.postprocessing.framework.eventloop import Module
+from PhysicsTools.NanoAODTools.postprocessing.tools import deltaPhi
 import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 from numpy import cos, sqrt, exp, array
@@ -8,10 +9,10 @@ from math import pi
 
 ## to be added:
 ##   - year dependence
-##   - data/MC dependence
 
 class vbfHeeProducer(Module):
-    def __init__(self, jetSelection, eleSelection, variables):
+    def __init__(self, isData, jetSelection, eleSelection, variables):
+        self.isData = isData
         self.jetSel = jetSelection
         self.eleSel = eleSelection
         self.variables = variables
@@ -56,10 +57,16 @@ class vbfHeeProducer(Module):
             self.out.fillBranch("%sJetID"%order, jet.jetId)
             self.out.fillBranch("%sJetPUJID"%order, jet.puId)
             self.out.fillBranch("%sJetQGL"%order, jet.qgl)
-            self.out.fillBranch("%sJetPtJerUp"%order, jet.pt_jerUp)
-            self.out.fillBranch("%sJetPtJerDown"%order, jet.pt_jerDown)
-            self.out.fillBranch("%sJetPtJecUp"%order, jet.pt_jesTotalUp)
-            self.out.fillBranch("%sJetPtJecDown"%order, jet.pt_jesTotalDown)
+            if not self.isData:
+                self.out.fillBranch("%sJetPtJerUp"%order, jet.pt_jerUp)
+                self.out.fillBranch("%sJetPtJerDown"%order, jet.pt_jerDown)
+                self.out.fillBranch("%sJetPtJecUp"%order, jet.pt_jesTotalUp)
+                self.out.fillBranch("%sJetPtJecDown"%order, jet.pt_jesTotalDown)
+            else:
+                self.out.fillBranch("%sJetPtJerUp"%order, -9999.)
+                self.out.fillBranch("%sJetPtJerDown"%order, -9999.)
+                self.out.fillBranch("%sJetPtJecUp"%order, -9999.)
+                self.out.fillBranch("%sJetPtJecDown"%order, -9999.)
         else:
             for var in self.variables.jetVariables:
                 self.out.fillBranch("%sJet%s"%(order,var), -9999.)
@@ -80,6 +87,8 @@ class vbfHeeProducer(Module):
 
     def analyze(self, event):
         """process event, return True (go to next module) or False (fail, go to next event)"""
+        ## first apply trigger if data
+        if self.isData and not (event.HLT_Diphoton30_22_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass90 or event.HLT_Diphoton30_22_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass95 or event.HLT_Ele32_WPTight_Gsf_L1DoubleEG): return False
 
         ## electron handling
         electrons = Collection(event, "Electron")
@@ -128,9 +137,7 @@ class vbfHeeProducer(Module):
         if eventSelected:
             ## dielectron system - FIXME modify this to a dedicated fill function
             dielectron = leadEle.p4() + subleadEle.p4()
-            dielectronDPhi= abs(leadEle.phi - subleadEle.phi)
-            while dielectronDPhi > pi:
-                dielectronDPhi = abs(dielectronDPhi - 2 * pi)
+            dielectronDPhi = deltaPhi(leadEle.phi,subleadEle.phi)
             dielectronCosPhi= cos(dielectronDPhi)
             dielectronSigmaMoM = sqrt( (leadEle.energyErr/leadEle.p4().E())**2 + (subleadEle.energyErr/subleadEle.p4().E())**2 )
             self.out.fillBranch('dielectronMass', dielectron.M())
@@ -142,14 +149,12 @@ class vbfHeeProducer(Module):
 
             if leadJet is not None and subleadJet is not None:
                 ## dijet system - FIXME modify this to a dedicated fill function
-                dijet = leadEle.p4() + subleadEle.p4()
-                dijetAbsDEta = abs(leadEle.eta - subleadEle.eta)
-                dijetDPhi= abs(leadEle.phi - subleadEle.phi)
-                while dijetDPhi > pi:
-                    dijetDPhi = abs(dijetDPhi - 2 * pi)
+                dijet = leadJet.p4() + subleadJet.p4()
+                dijetAbsDEta = abs(leadJet.eta - subleadJet.eta)
+                dijetDPhi = deltaPhi(leadJet.phi, subleadJet.phi)
                 dijetAbsDPhiTrunc = dijetDPhi if abs(dijetDPhi) < 3.1 else 3.1
                 dijetZep = abs( dielectron.Eta() - 0.5*(leadJet.eta+subleadJet.eta) )
-                dijetCentrality = exp( -4. * ((dijetZep/dijetAbsDEta)**2) )
+                dijetCentrality = exp( -4. * ((dijetZep/dijetAbsDEta)**2) ) if abs(dijetAbsDEta)>1e-6 else -9999.
                 dijetMinDRJetEle = min( array( [leadJet.DeltaR(leadEle),  leadJet.DeltaR(subleadEle), subleadJet.DeltaR(leadEle), subleadJet.DeltaR(subleadEle)] ) )
                 self.out.fillBranch('dijetMass', dijet.M())
                 self.out.fillBranch('dijetPt', dijet.Pt())
@@ -186,4 +191,5 @@ class vbfHeeProducer(Module):
 
 # define modules using the syntax 'name = lambda : constructor' to avoid having them loaded when not needed
 from PhysicsTools.NanoAODTools.postprocessing.examples.vbfHee.vbfHeeVariables import vbfHeeVars
-vbfHeeModuleConstr = lambda: vbfHeeProducer(jetSelection=lambda j: j.pt > 20., eleSelection=lambda e: e.pt > 25., variables = vbfHeeVars)
+vbfHeeModuleConstrData = lambda: vbfHeeProducer(isData=True, jetSelection=lambda j: j.pt > 20., eleSelection=lambda e: e.pt > 25., variables = vbfHeeVars)
+vbfHeeModuleConstrMC = lambda: vbfHeeProducer(isData=False, jetSelection=lambda j: j.pt > 20., eleSelection=lambda e: e.pt > 25., variables = vbfHeeVars)
