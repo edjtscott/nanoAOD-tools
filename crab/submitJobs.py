@@ -37,7 +37,8 @@ def processDataType( dsets, isSig, isBkg, isData, dry=False ):
     elif isBkg: procType = 'Background'
     elif isData: procType = 'Data'
     for dset in dsets:
-        dsetName = dset.split('/')[1]
+        if isData: dsetName = '%s_%s'%(dset.split('/')[1],dset.split('/')[2])
+        else: dsetName = dset.split('/')[1]
         print 'Processing the dataset %s'%dsetName
         subDir = '%s/Jobs/%s/sub_%s'%(getcwd(), procType, dsetName)
         if not path.isdir(subDir): system('mkdir -p %s'%subDir)
