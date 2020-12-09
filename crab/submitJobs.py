@@ -57,15 +57,18 @@ def processDataType( dsets, isSig, isBkg, isData, dry=False ):
 from optparse import OptionParser
 parser = OptionParser()
 parser.add_option("-d","--dryRun",action="store_true", default=False)
+parser.add_option("--runData",action="store_true", default=False)
+parser.add_option("--runSig",action="store_true", default=False)
+parser.add_option("--runBkg",action="store_true", default=False)
 (opts,args) = parser.parse_args()
 
-baseOutDir = '%s/Outputs/Pass0'%getcwd()
+baseOutDir = '%s/Outputs/Pass1'%getcwd()
 filePrepend = 'root://cms-xrd-global.cern.ch/'
 
 from  PhysicsTools.NanoAODTools.postprocessing.examples.vbfHee.vbfHeeDatasets import signalsUL17, backgroundsUL17, dataUL17
 
-processDataType(dsets=signalsUL17, isSig=True, isBkg=False, isData=False, dry = opts.dryRun)
+if opts.runSig:  processDataType(dsets=signalsUL17, isSig=True, isBkg=False, isData=False, dry = opts.dryRun)
 
-processDataType(dsets=backgroundsUL17, isSig=False, isBkg=True, isData=False, dry = opts.dryRun)
+if opts.runBkg:  processDataType(dsets=backgroundsUL17, isSig=False, isBkg=True, isData=False, dry = opts.dryRun)
 
-processDataType(dsets=dataUL17, isSig=False, isBkg=False, isData=True, dry = opts.dryRun)
+if opts.runData: processDataType(dsets=dataUL17, isSig=False, isBkg=False, isData=True, dry = opts.dryRun)

@@ -73,6 +73,59 @@ class vbfHeeProducer(Module):
             for var in self.variables.objectVariables:
                 self.out.fillBranch("%sJet%s"%(order,var), -9999.)
 
+    def fillDielectron(self, leadEle, subleadEle):
+        dielectron = leadEle.p4() + subleadEle.p4()
+        dielectronDPhi = deltaPhi(leadEle.phi,subleadEle.phi)
+        dielectronCosPhi= cos(dielectronDPhi)
+        dielectronSigmaMoM = sqrt( (leadEle.energyErr/leadEle.p4().E())**2 + (subleadEle.energyErr/subleadEle.p4().E())**2 )
+        self.out.fillBranch('dielectronMass', dielectron.M())
+        self.out.fillBranch('dielectronPt', dielectron.Pt())
+        self.out.fillBranch('dielectronEta', dielectron.Eta())
+        self.out.fillBranch('dielectronPhi', dielectron.Phi())
+        self.out.fillBranch('dielectronCosPhi', dielectronCosPhi)
+        self.out.fillBranch('dielectronSigmaMoM', dielectronSigmaMoM)
+
+    def fillDijet(self, leadEle, subleadEle, leadJet, subleadJet):
+        if leadJet is not None and subleadJet is not None:
+            dielectron = leadEle.p4() + subleadEle.p4()
+            dijet = leadJet.p4() + subleadJet.p4()
+            dijetAbsDEta = abs(leadJet.eta - subleadJet.eta)
+            dijetDPhi = deltaPhi(leadJet.phi, subleadJet.phi)
+            dijetAbsDPhiTrunc = dijetDPhi if abs(dijetDPhi) < 3.1 else 3.1
+            dijetZep = abs( dielectron.Eta() - 0.5*(leadJet.eta+subleadJet.eta) )
+            dijetCentrality = exp( -4. * ((dijetZep/dijetAbsDEta)**2) ) if abs(dijetAbsDEta)>1e-6 else -9999.
+            dijetMinDRJetEle = min( array( [leadJet.DeltaR(leadEle),  leadJet.DeltaR(subleadEle), subleadJet.DeltaR(leadEle), subleadJet.DeltaR(subleadEle)] ) )
+            dijetDieleDPhi = deltaPhi(dijet.Phi(), dielectron.Phi())
+            self.out.fillBranch('dijetMass', dijet.M())
+            self.out.fillBranch('dijetPt', dijet.Pt())
+            self.out.fillBranch('dijetEta', dijet.Eta())
+            self.out.fillBranch('dijetPhi', dijet.Phi())
+            self.out.fillBranch('dijetAbsDEta', dijetAbsDEta)
+            self.out.fillBranch('dijetAbsDPhiTrunc', dijetAbsDPhiTrunc)
+            self.out.fillBranch('dijetCentrality', dijetCentrality)
+            self.out.fillBranch('dijetMinDRJetEle', dijetMinDRJetEle)
+            self.out.fillBranch('dijetDieleDPhi', dijetDieleDPhi)
+
+            higgssystem = dielectron + dijet
+            self.out.fillBranch('higgssystemMass', higgssystem.M())
+            self.out.fillBranch('higgssystemPt', higgssystem.Pt())
+            self.out.fillBranch('higgssystemEta', higgssystem.Eta())
+            self.out.fillBranch('higgssystemPhi', higgssystem.Phi())
+        else:
+            self.out.fillBranch('dijetMass', -9999.)
+            self.out.fillBranch('dijetPt', -9999.)
+            self.out.fillBranch('dijetEta', -9999.)
+            self.out.fillBranch('dijetPhi', -9999.)
+            self.out.fillBranch('dijetAbsDEta', -9999.)
+            self.out.fillBranch('dijetAbsDPhiTrunc', -9999.)
+            self.out.fillBranch('dijetCentrality', -9999.)
+            self.out.fillBranch('dijetMinDRJetEle', -9999.)
+
+            self.out.fillBranch('higgssystemMass', -9999.)
+            self.out.fillBranch('higgssystemPt', -9999.)
+            self.out.fillBranch('higgssystemEta', -9999.)
+            self.out.fillBranch('higgssystemPhi', -9999.)
+
     def selectElectron(self, ele):
         if not ele.mvaFall17V2Iso_WP90: return False
         if not abs(ele.eta) < 2.5: return False
@@ -85,10 +138,20 @@ class vbfHeeProducer(Module):
         if not abs(jet.eta) < 4.7: return False
         return True
 
+    def selectEvent(self, leadEle, subleadEle):
+        if leadEle is None or subleadEle is None: return False
+        if not leadEle.pt > 35.: return False
+        if not subleadEle.pt > 25.: return False
+        theMass = (leadEle.p4() + subleadEle.p4()).M()
+        if not leadEle.pt > theMass/3.: return False
+        if not subleadEle.pt > theMass/4.: return False
+        if not (theMass>80. and theMass<180.): return False
+        return True
+
     def analyze(self, event):
         """process event, return True (go to next module) or False (fail, go to next event)"""
-        ## first apply trigger if data
-        if self.isData and not (event.HLT_Diphoton30_22_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass90 or event.HLT_Diphoton30_22_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass95 or event.HLT_Ele32_WPTight_Gsf_L1DoubleEG): return False
+        ## first apply trigger - now to both MC and data
+        if not (event.HLT_Diphoton30_22_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass90 or event.HLT_Diphoton30_22_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass95 or event.HLT_Ele32_WPTight_Gsf_L1DoubleEG): return False
 
         ## electron handling
         electrons = Collection(event, "Electron")
@@ -103,9 +166,6 @@ class vbfHeeProducer(Module):
                 subleadEle = ele
             elif subsubleadEle is None:
                 subsubleadEle = ele
-        self.fillElectron(leadEle, 'lead')
-        self.fillElectron(subleadEle, 'sublead')
-        self.fillElectron(subsubleadEle, 'subsublead')
 
         ## jet handling
         leadJet = None
@@ -124,69 +184,23 @@ class vbfHeeProducer(Module):
                 subleadJet = jet
             elif subsubleadJet is None:
                 subsubleadJet = jet
-        self.fillJet(leadJet, 'lead')
-        self.fillJet(subleadJet, 'sublead')
-        self.fillJet(subsubleadJet, 'subsublead')
 
-        ## perform event selection
-        eventSelected = False
-        if leadEle is not None and subleadEle is not None: 
-            if leadEle.pt > 35. and subleadEle.pt > 25.:
-                eventSelected = True
+        ## perform event selection and fill variables
+        if self.selectEvent(leadEle, subleadEle):
+            self.fillElectron(leadEle, 'lead')
+            self.fillElectron(subleadEle, 'sublead')
+            self.fillElectron(subsubleadEle, 'subsublead')
 
-        if eventSelected:
-            ## dielectron system - FIXME modify this to a dedicated fill function
-            dielectron = leadEle.p4() + subleadEle.p4()
-            dielectronDPhi = deltaPhi(leadEle.phi,subleadEle.phi)
-            dielectronCosPhi= cos(dielectronDPhi)
-            dielectronSigmaMoM = sqrt( (leadEle.energyErr/leadEle.p4().E())**2 + (subleadEle.energyErr/subleadEle.p4().E())**2 )
-            self.out.fillBranch('dielectronMass', dielectron.M())
-            self.out.fillBranch('dielectronPt', dielectron.Pt())
-            self.out.fillBranch('dielectronEta', dielectron.Eta())
-            self.out.fillBranch('dielectronPhi', dielectron.Phi())
-            self.out.fillBranch('dielectronCosPhi', dielectronCosPhi)
-            self.out.fillBranch('dielectronSigmaMoM', dielectronSigmaMoM)
+            self.fillJet(leadJet, 'lead')
+            self.fillJet(subleadJet, 'sublead')
+            self.fillJet(subsubleadJet, 'subsublead')
 
-            if leadJet is not None and subleadJet is not None:
-                ## dijet system - FIXME modify this to a dedicated fill function
-                dijet = leadJet.p4() + subleadJet.p4()
-                dijetAbsDEta = abs(leadJet.eta - subleadJet.eta)
-                dijetDPhi = deltaPhi(leadJet.phi, subleadJet.phi)
-                dijetAbsDPhiTrunc = dijetDPhi if abs(dijetDPhi) < 3.1 else 3.1
-                dijetZep = abs( dielectron.Eta() - 0.5*(leadJet.eta+subleadJet.eta) )
-                dijetCentrality = exp( -4. * ((dijetZep/dijetAbsDEta)**2) ) if abs(dijetAbsDEta)>1e-6 else -9999.
-                dijetMinDRJetEle = min( array( [leadJet.DeltaR(leadEle),  leadJet.DeltaR(subleadEle), subleadJet.DeltaR(leadEle), subleadJet.DeltaR(subleadEle)] ) )
-                self.out.fillBranch('dijetMass', dijet.M())
-                self.out.fillBranch('dijetPt', dijet.Pt())
-                self.out.fillBranch('dijetEta', dijet.Eta())
-                self.out.fillBranch('dijetPhi', dijet.Phi())
-                self.out.fillBranch('dijetAbsDEta', dijetAbsDEta)
-                self.out.fillBranch('dijetAbsDPhiTrunc', dijetAbsDPhiTrunc)
-                self.out.fillBranch('dijetCentrality', dijetCentrality)
-                self.out.fillBranch('dijetMinDRJetEle', dijetMinDRJetEle)
+            self.fillDielectron(leadEle, subleadEle) ## dielectron system
+            self.fillDijet(leadEle, subleadEle, leadJet, subleadJet) ## dijet and dijet plus diphoton system
 
-                ## higgs plus two jet system - FIXME modify this to a dedicated fill function
-                higgssystem = dielectron + dijet
-                self.out.fillBranch('higgssystemMass', higgssystem.M())
-                self.out.fillBranch('higgssystemPt', higgssystem.Pt())
-                self.out.fillBranch('higgssystemEta', higgssystem.Eta())
-                self.out.fillBranch('higgssystemPhi', higgssystem.Phi())
-            else:
-                self.out.fillBranch('dijetMass', -9999.)
-                self.out.fillBranch('dijetPt', -9999.)
-                self.out.fillBranch('dijetEta', -9999.)
-                self.out.fillBranch('dijetPhi', -9999.)
-                self.out.fillBranch('dijetAbsDEta', -9999.)
-                self.out.fillBranch('dijetAbsDPhiTrunc', -9999.)
-                self.out.fillBranch('dijetCentrality', -9999.)
-                self.out.fillBranch('dijetMinDRJetEle', -9999.)
+            return True
 
-                self.out.fillBranch('higgssystemMass', -9999.)
-                self.out.fillBranch('higgssystemPt', -9999.)
-                self.out.fillBranch('higgssystemEta', -9999.)
-                self.out.fillBranch('higgssystemPhi', -9999.)
-       
-        return eventSelected
+        else: return False
 
 
 # define modules using the syntax 'name = lambda : constructor' to avoid having them loaded when not needed

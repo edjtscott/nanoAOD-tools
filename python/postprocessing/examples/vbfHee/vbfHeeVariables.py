@@ -4,12 +4,12 @@ class VariableController():
     def __init__(self, orders):
         assert isinstance(orders,list)
         self.orders = orders
-        self.objectVariables = ['Mass','Pt','Eta','Phi']
-        self.electronVariables = ['IDMVA','SigmaE']
-        self.jetVariables = ['QGL','ID','PUJID','PtJerUp','PtJerDown','PtJecUp','PtJecDown']
-        self.eventVariables = ['dielectronMass','dielectronPt','dielectronEta','dielectronPhi','dielectronCosPhi','dielectronSigmaMoM',
-                               'dijetMass','dijetPt','dijetEta','dijetPhi','dijetAbsDEta','dijetAbsDPhiTrunc','dijetMinDRJetEle','dijetCentrality',
-                               'higgssystemMass','higgssystemPt','higgssystemEta','higgssystemPhi'
+        self.objectVariables = ['Mass', 'Pt', 'Eta', 'Phi']
+        self.electronVariables = ['IDMVA', 'SigmaE']
+        self.jetVariables = ['QGL', 'ID', 'PUJID', 'PtJerUp', 'PtJerDown', 'PtJecUp', 'PtJecDown']
+        self.eventVariables = ['dielectronMass', 'dielectronPt', 'dielectronEta', 'dielectronPhi', 'dielectronCosPhi', 'dielectronSigmaMoM', 
+                               'dijetMass', 'dijetPt', 'dijetEta', 'dijetPhi', 'dijetAbsDEta', 'dijetAbsDPhiTrunc', 'dijetMinDRJetEle', 'dijetCentrality', 'dijetDieleDPhi', 
+                               'higgssystemMass', 'higgssystemPt', 'higgssystemEta', 'higgssystemPhi'
                               ]
 
     def allFloatNames(self):
@@ -31,4 +31,4 @@ class VariableController():
         return ints
 
 
-vbfHeeVars = VariableController(orders = ['lead','sublead','subsublead'])
+vbfHeeVars = VariableController(orders = ['lead', 'sublead', 'subsublead'])
