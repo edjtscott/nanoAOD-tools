@@ -4,13 +4,14 @@ class VariableController():
     def __init__(self, orders):
         assert isinstance(orders,list)
         self.orders = orders
-        self.objectVariables = ['Mass', 'Pt', 'Eta', 'Phi']
-        self.electronVariables = ['IDMVA', 'SigmaE']
+        self.objectVariables = ['En', 'Mass', 'Pt', 'Eta', 'Phi']
+        self.electronVariables = ['IDMVA', 'SigmaE', 'Charge']
         self.jetVariables = ['QGL', 'ID', 'PUJID', 'PtJerUp', 'PtJerDown', 'PtJecUp', 'PtJecDown']
-        self.eventVariables = ['dielectronMass', 'dielectronPt', 'dielectronEta', 'dielectronPhi', 'dielectronCosPhi', 'dielectronSigmaMoM', 
-                               'dijetMass', 'dijetPt', 'dijetEta', 'dijetPhi', 'dijetAbsDEta', 'dijetAbsDPhiTrunc', 'dijetMinDRJetEle', 'dijetCentrality', 'dijetDieleDPhi', 
+        self.eventVariables = ['dielectronMass', 'dielectronPt', 'dielectronEta', 'dielectronPhi', 'dielectronCosPhi', 'dielectronSigmaMoM', 'leadElectronPtOvM', 'subleadElectronPtOvM',
+                               'dijetMass', 'dijetPt', 'dijetEta', 'dijetPhi', 'dijetAbsDEta', 'dijetDPhi', 'dijetMinDRJetEle', 'dijetCentrality', 'dijetDieleAbsDPhiTrunc', 
                                'higgssystemMass', 'higgssystemPt', 'higgssystemEta', 'higgssystemPhi'
                               ]
+        self.emptyVal = -999.
 
     def allFloatNames(self):
         floats = []

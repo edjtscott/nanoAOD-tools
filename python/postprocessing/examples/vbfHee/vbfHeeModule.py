@@ -8,7 +8,8 @@ from math import pi
 
 
 ## to be added:
-##   - year dependence
+##  - year dependence
+##  - function to add event weight (product of gen weight, pre-firing, SFs, anything else)
 
 class vbfHeeProducer(Module):
     def __init__(self, isData, jetSelection, eleSelection, variables):
@@ -16,7 +17,6 @@ class vbfHeeProducer(Module):
         self.jetSel = jetSelection
         self.eleSel = eleSelection
         self.variables = variables
-        pass
 
     def beginJob(self):
         pass
@@ -36,21 +36,24 @@ class vbfHeeProducer(Module):
 
     def fillElectron(self, ele, order):
         if ele is not None:
+            self.out.fillBranch("%sElectronEn"%order, ele.p4().E())
             self.out.fillBranch("%sElectronMass"%order, ele.mass)
             self.out.fillBranch("%sElectronPt"%order, ele.pt)
             self.out.fillBranch("%sElectronEta"%order, ele.eta)
             self.out.fillBranch("%sElectronPhi"%order, ele.phi)
             self.out.fillBranch("%sElectronIDMVA"%order, ele.mvaFall17V2Iso)
             self.out.fillBranch("%sElectronSigmaE"%order, ele.energyErr)
+            self.out.fillBranch("%sElectronCharge"%order, ele.charge)
         else:
             for var in self.variables.electronVariables:
-                self.out.fillBranch("%sElectron%s"%(order,var), -9999.)
+                self.out.fillBranch("%sElectron%s"%(order,var), self.variables.emptyVal)
             for var in self.variables.objectVariables:
-                self.out.fillBranch("%sElectron%s"%(order,var), -9999.)
+                self.out.fillBranch("%sElectron%s"%(order,var), self.variables.emptyVal)
 
     def fillJet(self, jet, order):
         if jet is not None:
-            self.out.fillBranch("%sJetMass"%order, jet.corr_JEC*jet.mass)
+            self.out.fillBranch("%sJetEn"%order, jet.p4(corr_pt=jet.pt_nom).E())
+            self.out.fillBranch("%sJetMass"%order, jet.p4(corr_pt=jet.pt_nom).M())
             self.out.fillBranch("%sJetPt"%order, jet.pt_nom)
             self.out.fillBranch("%sJetEta"%order, jet.eta)
             self.out.fillBranch("%sJetPhi"%order, jet.phi)
@@ -63,21 +66,23 @@ class vbfHeeProducer(Module):
                 self.out.fillBranch("%sJetPtJecUp"%order, jet.pt_jesTotalUp)
                 self.out.fillBranch("%sJetPtJecDown"%order, jet.pt_jesTotalDown)
             else:
-                self.out.fillBranch("%sJetPtJerUp"%order, -9999.)
-                self.out.fillBranch("%sJetPtJerDown"%order, -9999.)
-                self.out.fillBranch("%sJetPtJecUp"%order, -9999.)
-                self.out.fillBranch("%sJetPtJecDown"%order, -9999.)
+                self.out.fillBranch("%sJetPtJerUp"%order, self.variables.emptyVal)
+                self.out.fillBranch("%sJetPtJerDown"%order, self.variables.emptyVal)
+                self.out.fillBranch("%sJetPtJecUp"%order, self.variables.emptyVal)
+                self.out.fillBranch("%sJetPtJecDown"%order, self.variables.emptyVal)
         else:
             for var in self.variables.jetVariables:
-                self.out.fillBranch("%sJet%s"%(order,var), -9999.)
+                self.out.fillBranch("%sJet%s"%(order,var), self.variables.emptyVal)
             for var in self.variables.objectVariables:
-                self.out.fillBranch("%sJet%s"%(order,var), -9999.)
+                self.out.fillBranch("%sJet%s"%(order,var), self.variables.emptyVal)
 
     def fillDielectron(self, leadEle, subleadEle):
         dielectron = leadEle.p4() + subleadEle.p4()
         dielectronDPhi = deltaPhi(leadEle.phi,subleadEle.phi)
         dielectronCosPhi= cos(dielectronDPhi)
         dielectronSigmaMoM = sqrt( (leadEle.energyErr/leadEle.p4().E())**2 + (subleadEle.energyErr/subleadEle.p4().E())**2 )
+        self.out.fillBranch('leadElectronPtOvM', leadEle.pt/dielectron.M())
+        self.out.fillBranch('subleadElectronPtOvM', subleadEle.pt/dielectron.M())
         self.out.fillBranch('dielectronMass', dielectron.M())
         self.out.fillBranch('dielectronPt', dielectron.Pt())
         self.out.fillBranch('dielectronEta', dielectron.Eta())
@@ -91,20 +96,20 @@ class vbfHeeProducer(Module):
             dijet = leadJet.p4() + subleadJet.p4()
             dijetAbsDEta = abs(leadJet.eta - subleadJet.eta)
             dijetDPhi = deltaPhi(leadJet.phi, subleadJet.phi)
-            dijetAbsDPhiTrunc = dijetDPhi if abs(dijetDPhi) < 3.1 else 3.1
             dijetZep = abs( dielectron.Eta() - 0.5*(leadJet.eta+subleadJet.eta) )
-            dijetCentrality = exp( -4. * ((dijetZep/dijetAbsDEta)**2) ) if abs(dijetAbsDEta)>1e-6 else -9999.
+            dijetCentrality = exp( -4. * ((dijetZep/dijetAbsDEta)**2) ) if abs(dijetAbsDEta)>1e-6 else self.variables.emptyVal
             dijetMinDRJetEle = min( array( [leadJet.DeltaR(leadEle),  leadJet.DeltaR(subleadEle), subleadJet.DeltaR(leadEle), subleadJet.DeltaR(subleadEle)] ) )
-            dijetDieleDPhi = deltaPhi(dijet.Phi(), dielectron.Phi())
+            dijetDieleAbsDPhi = abs( deltaPhi(dijet.Phi(), dielectron.Phi()) )
+            dijetDieleAbsDPhiTrunc = dijetDieleAbsDPhi if abs(dijetDieleAbsDPhi) < 3.1 else 3.1
             self.out.fillBranch('dijetMass', dijet.M())
             self.out.fillBranch('dijetPt', dijet.Pt())
             self.out.fillBranch('dijetEta', dijet.Eta())
             self.out.fillBranch('dijetPhi', dijet.Phi())
             self.out.fillBranch('dijetAbsDEta', dijetAbsDEta)
-            self.out.fillBranch('dijetAbsDPhiTrunc', dijetAbsDPhiTrunc)
+            self.out.fillBranch('dijetDPhi', dijetDPhi)
             self.out.fillBranch('dijetCentrality', dijetCentrality)
             self.out.fillBranch('dijetMinDRJetEle', dijetMinDRJetEle)
-            self.out.fillBranch('dijetDieleDPhi', dijetDieleDPhi)
+            self.out.fillBranch('dijetDieleAbsDPhiTrunc', dijetDieleAbsDPhiTrunc)
 
             higgssystem = dielectron + dijet
             self.out.fillBranch('higgssystemMass', higgssystem.M())
@@ -112,19 +117,20 @@ class vbfHeeProducer(Module):
             self.out.fillBranch('higgssystemEta', higgssystem.Eta())
             self.out.fillBranch('higgssystemPhi', higgssystem.Phi())
         else:
-            self.out.fillBranch('dijetMass', -9999.)
-            self.out.fillBranch('dijetPt', -9999.)
-            self.out.fillBranch('dijetEta', -9999.)
-            self.out.fillBranch('dijetPhi', -9999.)
-            self.out.fillBranch('dijetAbsDEta', -9999.)
-            self.out.fillBranch('dijetAbsDPhiTrunc', -9999.)
-            self.out.fillBranch('dijetCentrality', -9999.)
-            self.out.fillBranch('dijetMinDRJetEle', -9999.)
+            self.out.fillBranch('dijetMass', self.variables.emptyVal)
+            self.out.fillBranch('dijetPt', self.variables.emptyVal)
+            self.out.fillBranch('dijetEta', self.variables.emptyVal)
+            self.out.fillBranch('dijetPhi', self.variables.emptyVal)
+            self.out.fillBranch('dijetAbsDEta', self.variables.emptyVal)
+            self.out.fillBranch('dijetDPhi', self.variables.emptyVal)
+            self.out.fillBranch('dijetCentrality', self.variables.emptyVal)
+            self.out.fillBranch('dijetMinDRJetEle', self.variables.emptyVal)
+            self.out.fillBranch('dijetDieleAbsDPhiTrunc', self.variables.emptyVal)
 
-            self.out.fillBranch('higgssystemMass', -9999.)
-            self.out.fillBranch('higgssystemPt', -9999.)
-            self.out.fillBranch('higgssystemEta', -9999.)
-            self.out.fillBranch('higgssystemPhi', -9999.)
+            self.out.fillBranch('higgssystemMass', self.variables.emptyVal)
+            self.out.fillBranch('higgssystemPt', self.variables.emptyVal)
+            self.out.fillBranch('higgssystemEta', self.variables.emptyVal)
+            self.out.fillBranch('higgssystemPhi', self.variables.emptyVal)
 
     def selectElectron(self, ele):
         if not ele.mvaFall17V2Iso_WP90: return False
@@ -134,7 +140,7 @@ class vbfHeeProducer(Module):
 
     def selectJet(self, jet):
         if not jet.jetId >= 5.5: return False
-        if not jet.puId >= 3.5: return False 
+        if jet.pt < 50. and not jet.puId >= 3.5: return False 
         if not abs(jet.eta) < 4.7: return False
         return True
 
@@ -151,7 +157,7 @@ class vbfHeeProducer(Module):
     def analyze(self, event):
         """process event, return True (go to next module) or False (fail, go to next event)"""
         ## first apply trigger - now to both MC and data
-        if not (event.HLT_Diphoton30_22_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass90 or event.HLT_Diphoton30_22_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass95 or event.HLT_Ele32_WPTight_Gsf_L1DoubleEG): return False
+        if not (event.HLT_Ele32_WPTight_Gsf_L1DoubleEG or event.HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL): return False
 
         ## electron handling
         electrons = Collection(event, "Electron")
