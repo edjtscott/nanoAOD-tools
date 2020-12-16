@@ -20,7 +20,7 @@ else:
      opts.files = str(opts.files).split(',')
 
 from PhysicsTools.NanoAODTools.postprocessing.framework.postprocessor import PostProcessor
-from  PhysicsTools.NanoAODTools.postprocessing.examples.vbfHee.vbfHeeModule import vbfHeeModuleConstrData, vbfHeeModuleConstrMC
+from  PhysicsTools.NanoAODTools.postprocessing.examples.vbfHee.vbfHeeModule import vbfHeeModuleConstrData2016, vbfHeeModuleConstrData2017, vbfHeeModuleConstrData2018, vbfHeeModuleConstrMC2016, vbfHeeModuleConstrMC2017, vbfHeeModuleConstrMC2018
 
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jetmetUncertainties import jetmetUncertainties2016, jetmetUncertainties2017, jetmetUncertainties2018, jetmetUncertainties2018Data
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jetmetHelperRun2 import createJMECorrector
@@ -56,16 +56,16 @@ if opts.isData:
             theModules += [jetmetUncertainties2017DataE]
         elif opts.runPeriod.count('F'):
             theModules += [jetmetUncertainties2017DataF]
-        theModules += [vbfHeeModuleConstrData]
+        theModules += [vbfHeeModuleConstrData2017]
     elif opts.year.count('2018'):
-        theModules += [jetmetUncertainties2018Data, vbfHeeModuleConstrData]
+        theModules += [jetmetUncertainties2018Data, vbfHeeModuleConstrData2018]
 else:
     if opts.year.count('2016'):
-        theModules += [puAutoWeight_2016, jetmetUncertainties2016, PrefireCorr2016, muonScaleRes2016, vbfHeeModuleConstrMC]
+        theModules += [puAutoWeight_2016, jetmetUncertainties2016, PrefireCorr2016, muonScaleRes2016, vbfHeeModuleConstrMC2016]
     elif opts.year.count('2017'):
-        theModules += [puAutoWeight_2017, jetmetUncertainties2017, PrefireCorr2017, muonScaleRes2017, vbfHeeModuleConstrMC]
+        theModules += [puAutoWeight_2017, jetmetUncertainties2017, PrefireCorr2017, muonScaleRes2017, vbfHeeModuleConstrMC2017]
     elif opts.year.count('2018'):
-        theModules += [puAutoWeight_2018, jetmetUncertainties2018, muonScaleRes2018, vbfHeeModuleConstrMC]
+        theModules += [puAutoWeight_2018, jetmetUncertainties2018, muonScaleRes2018, vbfHeeModuleConstrMC2018]
 
 p=PostProcessor( opts.outDir,
                  opts.files,       

@@ -8,12 +8,12 @@ from math import pi
 
 
 ## to be added:
-##  - year dependence
-##  - function to add event weight (product of gen weight, pre-firing, SFs, anything else)
+##  - full set of central object weights (ele SFs, others?)
 
 class vbfHeeProducer(Module):
-    def __init__(self, isData, jetSelection, eleSelection, variables):
+    def __init__(self, isData, year, jetSelection, eleSelection, variables):
         self.isData = isData
+        self.year = str(year)
         self.jetSel = jetSelection
         self.eleSel = eleSelection
         self.variables = variables
@@ -30,6 +30,8 @@ class vbfHeeProducer(Module):
             self.out.branch(floatName, "F")
         for intName in self.variables.allIntNames():
             self.out.branch(intName, "I")
+        self.out.branch("centralObjectWeight", "F")
+        self.out.branch("weight", "F")
 
     def endFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
         pass
@@ -154,6 +156,15 @@ class vbfHeeProducer(Module):
         if not (theMass>80. and theMass<180.): return False
         return True
 
+    def setWeight(self, genWeight, weights, weightTol=1000.):
+        centralObjectWeight = 1.
+        for weight in weights:
+            centralObjectWeight *= weight
+        if centralObjectWeight < 1./weightTol or centralObjectWeight > weightTol:
+            raise RuntimeError('Unphysical central weight of %.5f found'%centralObjectWeight)
+        self.out.fillBranch('centralObjectWeight', centralObjectWeight)
+        self.out.fillBranch('weight', centralObjectWeight*genWeight)
+
     def analyze(self, event):
         """process event, return True (go to next module) or False (fail, go to next event)"""
         ## first apply trigger - now to both MC and data
@@ -204,6 +215,12 @@ class vbfHeeProducer(Module):
             self.fillDielectron(leadEle, subleadEle) ## dielectron system
             self.fillDijet(leadEle, subleadEle, leadJet, subleadJet) ## dijet and dijet plus diphoton system
 
+            ## now set the event weight using the relevant factors
+            evtWeights = []
+            if self.year.count('2016') or self.year.count('2017'):
+                evtWeights.append(event.L1PreFiringWeight_Nom)
+            self.setWeight(event.genWeight, evtWeights)
+
             return True
 
         else: return False
@@ -211,5 +228,9 @@ class vbfHeeProducer(Module):
 
 # define modules using the syntax 'name = lambda : constructor' to avoid having them loaded when not needed
 from PhysicsTools.NanoAODTools.postprocessing.examples.vbfHee.vbfHeeVariables import vbfHeeVars
-vbfHeeModuleConstrData = lambda: vbfHeeProducer(isData=True, jetSelection=lambda j: j.pt > 20., eleSelection=lambda e: e.pt > 25., variables = vbfHeeVars)
-vbfHeeModuleConstrMC = lambda: vbfHeeProducer(isData=False, jetSelection=lambda j: j.pt > 20., eleSelection=lambda e: e.pt > 25., variables = vbfHeeVars)
+vbfHeeModuleConstrData2016 = lambda: vbfHeeProducer(isData=True, year=2016, jetSelection=lambda j: j.pt > 20., eleSelection=lambda e: e.pt > 25., variables = vbfHeeVars)
+vbfHeeModuleConstrMC2016 = lambda: vbfHeeProducer(isData=False, year=2016, jetSelection=lambda j: j.pt > 20., eleSelection=lambda e: e.pt > 25., variables = vbfHeeVars)
+vbfHeeModuleConstrData2017 = lambda: vbfHeeProducer(isData=True, year=2017, jetSelection=lambda j: j.pt > 20., eleSelection=lambda e: e.pt > 25., variables = vbfHeeVars)
+vbfHeeModuleConstrMC2017 = lambda: vbfHeeProducer(isData=False, year=2017, jetSelection=lambda j: j.pt > 20., eleSelection=lambda e: e.pt > 25., variables = vbfHeeVars)
+vbfHeeModuleConstrData2018 = lambda: vbfHeeProducer(isData=True, year=2018, jetSelection=lambda j: j.pt > 20., eleSelection=lambda e: e.pt > 25., variables = vbfHeeVars)
+vbfHeeModuleConstrMC2018 = lambda: vbfHeeProducer(isData=False, year=2018, jetSelection=lambda j: j.pt > 20., eleSelection=lambda e: e.pt > 25., variables = vbfHeeVars)
