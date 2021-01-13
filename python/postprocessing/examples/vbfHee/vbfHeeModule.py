@@ -54,9 +54,14 @@ class vbfHeeProducer(Module):
 
     def fillJet(self, jet, order):
         if jet is not None:
-            self.out.fillBranch("%sJetEn"%order, jet.p4(corr_pt=jet.pt_nom).E())
-            self.out.fillBranch("%sJetMass"%order, jet.p4(corr_pt=jet.pt_nom).M())
-            self.out.fillBranch("%sJetPt"%order, jet.pt_nom)
+            if not self.isData:
+                self.out.fillBranch("%sJetEn"%order, jet.p4(corr_pt=jet.pt_nom).E())
+                self.out.fillBranch("%sJetMass"%order, jet.p4(corr_pt=jet.pt_nom).M())
+                self.out.fillBranch("%sJetPt"%order, jet.pt_nom)
+            else:
+                self.out.fillBranch("%sJetEn"%order, jet.p4().E())
+                self.out.fillBranch("%sJetMass"%order, jet.p4().M())
+                self.out.fillBranch("%sJetPt"%order, jet.pt)
             self.out.fillBranch("%sJetEta"%order, jet.eta)
             self.out.fillBranch("%sJetPhi"%order, jet.phi)
             self.out.fillBranch("%sJetID"%order, jet.jetId)
@@ -103,6 +108,7 @@ class vbfHeeProducer(Module):
             dijetMinDRJetEle = min( array( [leadJet.DeltaR(leadEle),  leadJet.DeltaR(subleadEle), subleadJet.DeltaR(leadEle), subleadJet.DeltaR(subleadEle)] ) )
             dijetDieleAbsDPhi = abs( deltaPhi(dijet.Phi(), dielectron.Phi()) )
             dijetDieleAbsDPhiTrunc = dijetDieleAbsDPhi if abs(dijetDieleAbsDPhi) < 3.1 else 3.1
+            dijetDieleAbsDEta = abs(dijet.Eta() - dielectron.Eta())
             self.out.fillBranch('dijetMass', dijet.M())
             self.out.fillBranch('dijetPt', dijet.Pt())
             self.out.fillBranch('dijetEta', dijet.Eta())
@@ -112,6 +118,7 @@ class vbfHeeProducer(Module):
             self.out.fillBranch('dijetCentrality', dijetCentrality)
             self.out.fillBranch('dijetMinDRJetEle', dijetMinDRJetEle)
             self.out.fillBranch('dijetDieleAbsDPhiTrunc', dijetDieleAbsDPhiTrunc)
+            self.out.fillBranch('dijetDieleAbsDEta', dijetDieleAbsDEta)
 
             higgssystem = dielectron + dijet
             self.out.fillBranch('higgssystemMass', higgssystem.M())
@@ -128,6 +135,7 @@ class vbfHeeProducer(Module):
             self.out.fillBranch('dijetCentrality', self.variables.emptyVal)
             self.out.fillBranch('dijetMinDRJetEle', self.variables.emptyVal)
             self.out.fillBranch('dijetDieleAbsDPhiTrunc', self.variables.emptyVal)
+            self.out.fillBranch('dijetDieleAbsDEta', self.variables.emptyVal)
 
             self.out.fillBranch('higgssystemMass', self.variables.emptyVal)
             self.out.fillBranch('higgssystemPt', self.variables.emptyVal)
@@ -156,7 +164,7 @@ class vbfHeeProducer(Module):
         if not (theMass>80. and theMass<180.): return False
         return True
 
-    def setWeight(self, genWeight, weights, weightTol=1000.):
+    def setWeightMC(self, genWeight, weights, weightTol=1000.):
         centralObjectWeight = 1.
         for weight in weights:
             centralObjectWeight *= weight
@@ -164,6 +172,10 @@ class vbfHeeProducer(Module):
             raise RuntimeError('Unphysical central weight of %.5f found'%centralObjectWeight)
         self.out.fillBranch('centralObjectWeight', centralObjectWeight)
         self.out.fillBranch('weight', centralObjectWeight*genWeight)
+
+    def setWeightData(self):
+        self.out.fillBranch('centralObjectWeight', 1.)
+        self.out.fillBranch('weight', 1.)
 
     def analyze(self, event):
         """process event, return True (go to next module) or False (fail, go to next event)"""
@@ -216,10 +228,13 @@ class vbfHeeProducer(Module):
             self.fillDijet(leadEle, subleadEle, leadJet, subleadJet) ## dijet and dijet plus diphoton system
 
             ## now set the event weight using the relevant factors
-            evtWeights = []
-            if self.year.count('2016') or self.year.count('2017'):
-                evtWeights.append(event.L1PreFiringWeight_Nom)
-            self.setWeight(event.genWeight, evtWeights)
+            if not self.isData:
+                evtWeights = []
+                if self.year.count('2016') or self.year.count('2017'):
+                    evtWeights.append(event.L1PreFiringWeight_Nom)
+                self.setWeightMC(event.genWeight, evtWeights)
+            else: 
+                self.setWeightData()
 
             return True
 

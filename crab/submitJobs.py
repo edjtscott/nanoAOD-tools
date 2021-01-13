@@ -30,7 +30,7 @@ def safe_das_query( search, cmd ):
     return output
 
 
-def processDataType( dsets, isSig, isBkg, isData, dry=False ):
+def processDataType( dsets, isSig, isBkg, isData, dry=False, filePrepend='root://cms-xrd-global.cern.ch/', baseOutDir='.'):
     if sum( [int(isSig), int(isBkg), int(isData)] ) > 1: raise Exception('Can only be one of signal, background, or data!')
     procType = None
     if isSig: procType = 'Signal'
@@ -62,13 +62,12 @@ parser.add_option("--runSig",action="store_true", default=False)
 parser.add_option("--runBkg",action="store_true", default=False)
 (opts,args) = parser.parse_args()
 
-baseOutDir = '%s/Outputs/Pass1'%getcwd()
-filePrepend = 'root://cms-xrd-global.cern.ch/'
+baseOutDir = '%s/Outputs/Pass3'%getcwd()
 
 from  PhysicsTools.NanoAODTools.postprocessing.examples.vbfHee.vbfHeeDatasets import signalsUL17, backgroundsUL17, dataUL17
 
-if opts.runSig:  processDataType(dsets=signalsUL17, isSig=True, isBkg=False, isData=False, dry = opts.dryRun)
+if opts.runSig:  processDataType(dsets=signalsUL17, isSig=True, isBkg=False, isData=False, dry = opts.dryRun, baseOutDir = baseOutDir)
 
-if opts.runBkg:  processDataType(dsets=backgroundsUL17, isSig=False, isBkg=True, isData=False, dry = opts.dryRun)
+if opts.runBkg:  processDataType(dsets=backgroundsUL17, isSig=False, isBkg=True, isData=False, dry = opts.dryRun, baseOutDir = baseOutDir)
 
-if opts.runData: processDataType(dsets=dataUL17, isSig=False, isBkg=False, isData=True, dry = opts.dryRun)
+if opts.runData: processDataType(dsets=dataUL17, isSig=False, isBkg=False, isData=True, dry = opts.dryRun, baseOutDir = baseOutDir)
