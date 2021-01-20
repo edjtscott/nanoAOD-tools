@@ -100,7 +100,8 @@ class vbfHeeProducer(Module):
     def fillDijet(self, leadEle, subleadEle, leadJet, subleadJet):
         if leadJet is not None and subleadJet is not None:
             dielectron = leadEle.p4() + subleadEle.p4()
-            dijet = leadJet.p4() + subleadJet.p4()
+            if not self.isData: dijet = leadJet.p4(corr_pt=leadJet.pt_nom) + subleadJet.p4(corr_pt=subleadJet.pt_nom)
+            else: dijet = leadJet.p4() + subleadJet.p4()
             dijetAbsDEta = abs(leadJet.eta - subleadJet.eta)
             dijetDPhi = deltaPhi(leadJet.phi, subleadJet.phi)
             dijetZep = abs( dielectron.Eta() - 0.5*(leadJet.eta+subleadJet.eta) )
@@ -180,7 +181,7 @@ class vbfHeeProducer(Module):
     def analyze(self, event):
         """process event, return True (go to next module) or False (fail, go to next event)"""
         ## first apply trigger - now to both MC and data
-        if not (event.HLT_Ele32_WPTight_Gsf_L1DoubleEG or event.HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL): return False
+        if not event.HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL: return False
 
         ## electron handling
         electrons = Collection(event, "Electron")

@@ -1,16 +1,5 @@
 # this is a comment
-drop *
-keep run 
-keep luminosityBlock
-keep event
-keep HTXS*
-keep *Electron*
-keep *Jet*
-keep genWeight
-keep LHEWeight_originalXWGTUP
-keep Pileup*
-keep L1PreFiringWeight*
+keep *
 drop HLT_*
 drop L1_*
-keep HLT_Diphoton30*
-keep HLT_Ele32_WPTight_Gsf_L1DoubleEG
+keep HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL
