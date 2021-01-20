@@ -25,7 +25,7 @@ backgroundsRR = ['/EWK_LLJJ_MLL-50_MJJ-120_TuneCH3_PSweights_13TeV-madgraph-herw
                 ]
 
 dataUL17 = ['/DoubleEG/Run2017B-UL2017_MiniAODv1_NanoAODv2-v1/NANOAOD', 
-            '/DoubleEG/Run2017C-UL2017_MiniAODv1_NanoAODv2-v2/NANOAOD', 
+            '/DoubleEG/Run2017C-UL2017_MiniAODv1_NanoAODv2-v1/NANOAOD',
             '/DoubleEG/Run2017D-UL2017_MiniAODv1_NanoAODv2-v1/NANOAOD', 
             '/DoubleEG/Run2017E-UL2017_MiniAODv1_NanoAODv2-v1/NANOAOD', 
             '/DoubleEG/Run2017F-UL2017_MiniAODv1_NanoAODv2-v1/NANOAOD'
