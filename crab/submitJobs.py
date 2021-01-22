@@ -14,7 +14,7 @@ def submitJob( subdir, theCmd, jobNumber, dryRun=False ):
         elif '!NAME!' in line:
           line = line.replace('!NAME!',subName.replace('.sh',''))
         outFile.write(line)
-  subCmd = 'qsub -q hep.q -o %s -e %s -l h_vmem=12G %s' %(subName.replace('.sh','.log'), subName.replace('.sh','.err'), subName) 
+  subCmd = 'qsub -q hep.q -o %s -e %s -l h_vmem=12G -l h_rt=10:0:0 %s' %(subName.replace('.sh','.log'), subName.replace('.sh','.err'), subName) 
   print
   print subCmd
   if not dryRun:
@@ -62,7 +62,7 @@ parser.add_option("--runSig",action="store_true", default=False)
 parser.add_option("--runBkg",action="store_true", default=False)
 (opts,args) = parser.parse_args()
 
-baseOutDir = '%s/Outputs/Pass3'%getcwd()
+baseOutDir = '%s/Outputs/Pass5'%getcwd()
 
 from  PhysicsTools.NanoAODTools.postprocessing.examples.vbfHee.vbfHeeDatasets import signalsUL17, backgroundsUL17, dataUL17
 
