@@ -7,7 +7,8 @@ class VariableController():
         self.objectVariables = ['En', 'Mass', 'Pt', 'Eta', 'Phi']
         self.electronVariables = ['IDMVA', 'SigmaE', 'Charge']
         self.jetVariables = ['QGL', 'ID', 'PUJID', 'PtJerUp', 'PtJerDown', 'PtJecUp', 'PtJecDown']
-        self.eventVariables = ['dielectronMass', 'dielectronPt', 'dielectronEta', 'dielectronPhi', 'dielectronCosPhi', 'dielectronSigmaMoM', 'leadElectronPtOvM', 'subleadElectronPtOvM',
+        self.eventVariables = ['leadJetDieleDPhi', 'leadJetDieleDEta', 'subleadJetDieleDPhi', 'subleadJetDieleDEta',
+                               'dielectronMass', 'dielectronPt', 'dielectronEta', 'dielectronPhi', 'dielectronCosPhi', 'dielectronSigmaMoM', 'leadElectronPtOvM', 'subleadElectronPtOvM',
                                'dijetMass', 'dijetPt', 'dijetEta', 'dijetPhi', 'dijetAbsDEta', 'dijetDPhi', 'dijetMinDRJetEle', 'dijetCentrality', 'dijetDieleAbsDPhiTrunc', 'dijetDieleAbsDEta',
                                'higgssystemMass', 'higgssystemPt', 'higgssystemEta', 'higgssystemPhi'
                               ]

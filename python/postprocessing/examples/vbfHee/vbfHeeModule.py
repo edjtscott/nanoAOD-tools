@@ -98,8 +98,20 @@ class vbfHeeProducer(Module):
         self.out.fillBranch('dielectronSigmaMoM', dielectronSigmaMoM)
 
     def fillDijet(self, leadEle, subleadEle, leadJet, subleadJet):
+        dielectron = leadEle.p4() + subleadEle.p4()
+        if leadJet is not None:
+            self.out.fillBranch('leadJetDieleDPhi', deltaPhi(leadJet.eta, dielectron.Phi()))
+            self.out.fillBranch('leadJetDieleDEta', leadJet.eta - dielectron.Eta())
+        else:
+            self.out.fillBranch('leadJetDieleDPhi', self.variables.emptyVal)
+            self.out.fillBranch('leadJetDieleDEta', self.variables.emptyVal)
+        if subleadJet is not None:
+            self.out.fillBranch('subleadJetDieleDPhi', deltaPhi(subleadJet.phi, dielectron.Phi()))
+            self.out.fillBranch('subleadJetDieleDEta', subleadJet.eta - dielectron.Eta())
+        else:
+            self.out.fillBranch('subleadJetDieleDPhi', self.variables.emptyVal)
+            self.out.fillBranch('subleadJetDieleDEta', self.variables.emptyVal)
         if leadJet is not None and subleadJet is not None:
-            dielectron = leadEle.p4() + subleadEle.p4()
             if not self.isData: dijet = leadJet.p4(corr_pt=leadJet.pt_nom) + subleadJet.p4(corr_pt=subleadJet.pt_nom)
             else: dijet = leadJet.p4() + subleadJet.p4()
             dijetAbsDEta = abs(leadJet.eta - subleadJet.eta)
@@ -153,6 +165,10 @@ class vbfHeeProducer(Module):
         if not jet.jetId >= 5.5: return False
         if jet.pt < 50. and not jet.puId >= 3.5: return False 
         if not abs(jet.eta) < 4.7: return False
+        if not self.isData: 
+            if not jet.pt_nom > 25.: return False
+        else:
+            if not jet.pt > 25.: return False
         return True
 
     def selectEvent(self, leadEle, subleadEle):
@@ -244,9 +260,11 @@ class vbfHeeProducer(Module):
 
 # define modules using the syntax 'name = lambda : constructor' to avoid having them loaded when not needed
 from PhysicsTools.NanoAODTools.postprocessing.examples.vbfHee.vbfHeeVariables import vbfHeeVars
-vbfHeeModuleConstrData2016 = lambda: vbfHeeProducer(isData=True, year=2016, jetSelection=lambda j: j.pt > 20., eleSelection=lambda e: e.pt > 25., variables = vbfHeeVars)
-vbfHeeModuleConstrMC2016 = lambda: vbfHeeProducer(isData=False, year=2016, jetSelection=lambda j: j.pt > 20., eleSelection=lambda e: e.pt > 25., variables = vbfHeeVars)
-vbfHeeModuleConstrData2017 = lambda: vbfHeeProducer(isData=True, year=2017, jetSelection=lambda j: j.pt > 20., eleSelection=lambda e: e.pt > 25., variables = vbfHeeVars)
-vbfHeeModuleConstrMC2017 = lambda: vbfHeeProducer(isData=False, year=2017, jetSelection=lambda j: j.pt > 20., eleSelection=lambda e: e.pt > 25., variables = vbfHeeVars)
-vbfHeeModuleConstrData2018 = lambda: vbfHeeProducer(isData=True, year=2018, jetSelection=lambda j: j.pt > 20., eleSelection=lambda e: e.pt > 25., variables = vbfHeeVars)
-vbfHeeModuleConstrMC2018 = lambda: vbfHeeProducer(isData=False, year=2018, jetSelection=lambda j: j.pt > 20., eleSelection=lambda e: e.pt > 25., variables = vbfHeeVars)
+jetThresh = 20.
+eleThresh = 25.
+vbfHeeModuleConstrData2016 = lambda: vbfHeeProducer(isData=True,  year=2016, jetSelection=lambda j: j.pt > jetThresh, eleSelection=lambda e: e.pt > eleThresh, variables = vbfHeeVars)
+vbfHeeModuleConstrMC2016   = lambda: vbfHeeProducer(isData=False, year=2016, jetSelection=lambda j: j.pt > jetThresh, eleSelection=lambda e: e.pt > eleThresh, variables = vbfHeeVars)
+vbfHeeModuleConstrData2017 = lambda: vbfHeeProducer(isData=True,  year=2017, jetSelection=lambda j: j.pt > jetThresh, eleSelection=lambda e: e.pt > eleThresh, variables = vbfHeeVars)
+vbfHeeModuleConstrMC2017   = lambda: vbfHeeProducer(isData=False, year=2017, jetSelection=lambda j: j.pt > jetThresh, eleSelection=lambda e: e.pt > eleThresh, variables = vbfHeeVars)
+vbfHeeModuleConstrData2018 = lambda: vbfHeeProducer(isData=True,  year=2018, jetSelection=lambda j: j.pt > jetThresh, eleSelection=lambda e: e.pt > eleThresh, variables = vbfHeeVars)
+vbfHeeModuleConstrMC2018   = lambda: vbfHeeProducer(isData=False, year=2018, jetSelection=lambda j: j.pt > jetThresh, eleSelection=lambda e: e.pt > eleThresh, variables = vbfHeeVars)
