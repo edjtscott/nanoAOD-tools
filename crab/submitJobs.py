@@ -57,17 +57,18 @@ def processDataType( dsets, isSig, isBkg, isData, dry=False, filePrepend='root:/
 from optparse import OptionParser
 parser = OptionParser()
 parser.add_option("-d","--dryRun",action="store_true", default=False)
+parser.add_option("--year",type="int", default=2017)
 parser.add_option("--runData",action="store_true", default=False)
 parser.add_option("--runSig",action="store_true", default=False)
 parser.add_option("--runBkg",action="store_true", default=False)
 (opts,args) = parser.parse_args()
 
-baseOutDir = '%s/Outputs/Pass5'%getcwd()
+baseOutDir = '%s/Outputs/Pass6/%g'%(getcwd(), opts.year)
 
-from  PhysicsTools.NanoAODTools.postprocessing.examples.vbfHee.vbfHeeDatasets import signalsUL17, backgroundsUL17, dataUL17
+from  PhysicsTools.NanoAODTools.postprocessing.examples.vbfHee.vbfHeeDatasets import signals, backgrounds, datas
 
-if opts.runSig:  processDataType(dsets=signalsUL17, isSig=True, isBkg=False, isData=False, dry = opts.dryRun, baseOutDir = baseOutDir)
+if opts.runSig:  processDataType(dsets=signals[opts.year], isSig=True, isBkg=False, isData=False, dry = opts.dryRun, baseOutDir = baseOutDir)
 
-if opts.runBkg:  processDataType(dsets=backgroundsUL17, isSig=False, isBkg=True, isData=False, dry = opts.dryRun, baseOutDir = baseOutDir)
+if opts.runBkg:  processDataType(dsets=backgrounds[opts.year], isSig=False, isBkg=True, isData=False, dry = opts.dryRun, baseOutDir = baseOutDir)
 
-if opts.runData: processDataType(dsets=dataUL17, isSig=False, isBkg=False, isData=True, dry = opts.dryRun, baseOutDir = baseOutDir)
+if opts.runData: processDataType(dsets=datas[opts.year], isSig=False, isBkg=False, isData=True, dry = opts.dryRun, baseOutDir = baseOutDir)

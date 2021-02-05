@@ -12,9 +12,11 @@ class VariableController():
                                'dijetMass', 'dijetPt', 'dijetEta', 'dijetPhi', 'dijetAbsDEta', 'dijetDPhi', 'dijetMinDRJetEle', 'dijetCentrality', 'dijetDieleAbsDPhiTrunc', 'dijetDieleAbsDEta',
                                'higgssystemMass', 'higgssystemPt', 'higgssystemEta', 'higgssystemPhi'
                               ]
+        self.jetPtSystematics = ['pt_jesTotalUp', 'pt_jesTotalDown', 'pt_jerUp', 'pt_jerDown']
         self.emptyVal = -999.
 
     def allFloatNames(self):
+        ## to do: add in the full set of systematic variation names here
         floats = []
         for order in self.orders:
             for var in self.objectVariables:
@@ -24,6 +26,8 @@ class VariableController():
                floats.append('%sElectron%s'%(order,var))
             for var in self.jetVariables:
                floats.append('%sJet%s'%(order,var))
+               for systVar in self.jetPtSystematics:
+                   floats.append('%sJet%s%s'%(order,var,systVar))
         for var in self.eventVariables:
            floats.append('%s'%(var))
         return floats

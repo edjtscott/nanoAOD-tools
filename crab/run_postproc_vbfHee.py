@@ -14,8 +14,8 @@ opts.year = str(opts.year)
 opts.outDir = str(opts.outDir)
 
 if opts.files is None:
-    opts.files=["root://cms-xrd-global.cern.ch//store/mc/RunIISummer19UL17NanoAOD/GluGluHToEE_M125_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/106X_mc2017_realistic_v6-v1/00000/D1F68AEE-C601-1B43-8C4E-C2BEA41A5A45.root"]
-    #opts.files=["root://cms-xrd-global.cern.ch//store/data/Run2017B/DoubleEG/NANOAOD/UL2017_02Dec2019-v1/280000/9517812B-75C7-BF48-88E7-F5E4FB39210D.root"]
+    if not opts.isData: opts.files=["root://cms-xrd-global.cern.ch//store/mc/RunIISummer19UL17NanoAOD/GluGluHToEE_M125_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/106X_mc2017_realistic_v6-v1/00000/D1F68AEE-C601-1B43-8C4E-C2BEA41A5A45.root"]
+    else: opts.files=["root://cms-xrd-global.cern.ch//store/data/Run2017B/DoubleEG/NANOAOD/UL2017_02Dec2019-v1/280000/9517812B-75C7-BF48-88E7-F5E4FB39210D.root"]
 else:
      opts.files = str(opts.files).split(',')
 

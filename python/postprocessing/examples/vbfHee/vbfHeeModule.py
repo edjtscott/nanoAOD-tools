@@ -12,11 +12,13 @@ from math import pi
 
 class vbfHeeProducer(Module):
     def __init__(self, isData, year, jetSelection, eleSelection, variables):
+        print 'ED DEBUG initialising module'
         self.isData = isData
         self.year = str(year)
         self.jetSel = jetSelection
         self.eleSel = eleSelection
         self.variables = variables
+        print 'ED DEBUG done initialising module'
 
     def beginJob(self):
         pass
@@ -25,6 +27,7 @@ class vbfHeeProducer(Module):
         pass
 
     def beginFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
+        print 'ED DEBUG in beginFile'
         self.out = wrappedOutputTree
         for floatName in self.variables.allFloatNames():
             self.out.branch(floatName, "F")
@@ -32,73 +35,86 @@ class vbfHeeProducer(Module):
             self.out.branch(intName, "I")
         self.out.branch("centralObjectWeight", "F")
         self.out.branch("weight", "F")
+        for var in self.jetSystmatics:
+            varLabel = '_%s'%var.split('_')[-1]
+            self.out.branch('dijetMass%s'%varLabel)
+            self.out.branch('dijetPt%s'%varLabel)
+            self.out.branch('higgssystemMass%s'%variationLabel)
+            self.out.branch('higgssystemPt%s'%variationLabel)
+        print 'ED DEBUG leaving beginFile'
 
     def endFile(self, inputFile, outputFile, inputTree, wrappedOutputTree):
         pass
 
-    def fillElectron(self, ele, order):
+    def fillElectron(self, ele, order, ptVariation=None, variationName=''):
         if ele is not None:
-            self.out.fillBranch("%sElectronEn"%order, ele.p4().E())
-            self.out.fillBranch("%sElectronMass"%order, ele.mass)
-            self.out.fillBranch("%sElectronPt"%order, ele.pt)
-            self.out.fillBranch("%sElectronEta"%order, ele.eta)
-            self.out.fillBranch("%sElectronPhi"%order, ele.phi)
-            self.out.fillBranch("%sElectronIDMVA"%order, ele.mvaFall17V2Iso)
-            self.out.fillBranch("%sElectronSigmaE"%order, ele.energyErr)
-            self.out.fillBranch("%sElectronCharge"%order, ele.charge)
+            if self.isData or ptVariation is None: actualPt = ele.pt
+            elif ptVariation is not None: actualPt = ptVariation
+            theP4 = ele.p4(corr_pt=actualPt)
+            self.out.fillBranch("%sElectronEn%s"%order, theP4.E(), variationName)
+            self.out.fillBranch("%sElectronMass%s"%order, theP4.M(), variationName)
+            self.out.fillBranch("%sElectronPt%s"%order, theP4.Pt(), variationName)
+            if ptVariation is None:
+                self.out.fillBranch("%sElectronEta"%order, ele.eta)
+                self.out.fillBranch("%sElectronPhi"%order, ele.phi)
+                self.out.fillBranch("%sElectronIDMVA"%order, ele.mvaFall17V2Iso)
+                self.out.fillBranch("%sElectronSigmaE"%order, ele.energyErr)
+                self.out.fillBranch("%sElectronCharge"%order, ele.charge)
         else:
             for var in self.variables.electronVariables:
                 self.out.fillBranch("%sElectron%s"%(order,var), self.variables.emptyVal)
             for var in self.variables.objectVariables:
                 self.out.fillBranch("%sElectron%s"%(order,var), self.variables.emptyVal)
 
-    def fillJet(self, jet, order):
+    def fillJet(self, jet, order, ptVariation=None, variationName=''):
         if jet is not None:
-            if not self.isData:
-                self.out.fillBranch("%sJetEn"%order, jet.p4(corr_pt=jet.pt_nom).E())
-                self.out.fillBranch("%sJetMass"%order, jet.p4(corr_pt=jet.pt_nom).M())
-                self.out.fillBranch("%sJetPt"%order, jet.pt_nom)
-            else:
-                self.out.fillBranch("%sJetEn"%order, jet.p4().E())
-                self.out.fillBranch("%sJetMass"%order, jet.p4().M())
-                self.out.fillBranch("%sJetPt"%order, jet.pt)
-            self.out.fillBranch("%sJetEta"%order, jet.eta)
-            self.out.fillBranch("%sJetPhi"%order, jet.phi)
-            self.out.fillBranch("%sJetID"%order, jet.jetId)
-            self.out.fillBranch("%sJetPUJID"%order, jet.puId)
-            self.out.fillBranch("%sJetQGL"%order, jet.qgl)
-            if not self.isData:
-                self.out.fillBranch("%sJetPtJerUp"%order, jet.pt_jerUp)
-                self.out.fillBranch("%sJetPtJerDown"%order, jet.pt_jerDown)
-                self.out.fillBranch("%sJetPtJecUp"%order, jet.pt_jesTotalUp)
-                self.out.fillBranch("%sJetPtJecDown"%order, jet.pt_jesTotalDown)
-            else:
-                self.out.fillBranch("%sJetPtJerUp"%order, self.variables.emptyVal)
-                self.out.fillBranch("%sJetPtJerDown"%order, self.variables.emptyVal)
-                self.out.fillBranch("%sJetPtJecUp"%order, self.variables.emptyVal)
-                self.out.fillBranch("%sJetPtJecDown"%order, self.variables.emptyVal)
+            if self.isData: actualPt = jet.pt
+            elif ptVariation is not None: actualPt = ptVariation
+            else: actualPt = jet.pt_nom
+            self.out.fillBranch("%sJetEn%s"%order, jet.p4(corr_pt=actualPt).E(), variationName)
+            self.out.fillBranch("%sJetMass%s"%order, jet.p4(corr_pt=actualPt).M(), variationName)
+            self.out.fillBranch("%sJetPt%s"%order, actualPt, variationName)
+            if ptVariation is None:
+                self.out.fillBranch("%sJetEta"%order, jet.eta)
+                self.out.fillBranch("%sJetPhi"%order, jet.phi)
+                self.out.fillBranch("%sJetID"%order, jet.jetId)
+                self.out.fillBranch("%sJetPUJID"%order, jet.puId)
+                self.out.fillBranch("%sJetQGL"%order, jet.qgl)
         else:
             for var in self.variables.jetVariables:
                 self.out.fillBranch("%sJet%s"%(order,var), self.variables.emptyVal)
             for var in self.variables.objectVariables:
                 self.out.fillBranch("%sJet%s"%(order,var), self.variables.emptyVal)
 
-    def fillDielectron(self, leadEle, subleadEle):
-        dielectron = leadEle.p4() + subleadEle.p4()
+    def fillDielectron(self, leadEle, subleadEle, leadPtVariation=None, subleadPtVariation=None, variationName=''):
+        if self.isData or variationName=='': 
+            actualLeadPt = leadEle.pt
+            actualSubleadPt = subleadEle.pt
+        elif variationName!='': 
+            actualLeadPt = leadPtVariation
+            actualSubleadPt = subleadPtVariation
+        dielectron = leadEle.p4(corr_pt=actualLeadPt) + subleadEle.p4(corr_pt=actualSubleadPt)
         dielectronDPhi = deltaPhi(leadEle.phi,subleadEle.phi)
         dielectronCosPhi= cos(dielectronDPhi)
-        dielectronSigmaMoM = sqrt( (leadEle.energyErr/leadEle.p4().E())**2 + (subleadEle.energyErr/subleadEle.p4().E())**2 )
-        self.out.fillBranch('leadElectronPtOvM', leadEle.pt/dielectron.M())
-        self.out.fillBranch('subleadElectronPtOvM', subleadEle.pt/dielectron.M())
-        self.out.fillBranch('dielectronMass', dielectron.M())
-        self.out.fillBranch('dielectronPt', dielectron.Pt())
-        self.out.fillBranch('dielectronEta', dielectron.Eta())
-        self.out.fillBranch('dielectronPhi', dielectron.Phi())
-        self.out.fillBranch('dielectronCosPhi', dielectronCosPhi)
-        self.out.fillBranch('dielectronSigmaMoM', dielectronSigmaMoM)
+        dielectronSigmaMoM = sqrt( (leadEle.energyErr/leadEle.p4(corr_pt=actualLeadPt).E())**2 + (subleadEle.energyErr/subleadEle.p4(corr_pt=actualSubleadPt).E())**2 )
+        self.out.fillBranch('leadElectronPtOvM%s', leadEle.pt/dielectron.M(), variationName)
+        self.out.fillBranch('subleadElectronPtOvM%s', subleadEle.pt/dielectron.M(), variationName)
+        self.out.fillBranch('dielectronMass%s', dielectron.M(), variationName)
+        self.out.fillBranch('dielectronPt%s', dielectron.Pt(), variationName)
+        if variationName=='':
+            self.out.fillBranch('dielectronEta', dielectron.Eta())
+            self.out.fillBranch('dielectronPhi', dielectron.Phi())
+            self.out.fillBranch('dielectronCosPhi', dielectronCosPhi)
+            self.out.fillBranch('dielectronSigmaMoM', dielectronSigmaMoM)
 
-    def fillDijet(self, leadEle, subleadEle, leadJet, subleadJet):
-        dielectron = leadEle.p4() + subleadEle.p4()
+    def fillDijet(self, leadEle, subleadEle, leadJet, subleadJet, leadElePtVariation=None, subleadElePtVariation=None, leadJetPtVariation=None, subleadJetPtVariation=None, variationName=''):
+        if self.isData or variationName=='': 
+            actualLeadElePt = leadEle.pt
+            actualSubleadElePt = subleadEle.pt
+        elif variationName!='': 
+            actualLeadElePt = leadElePtVariation
+            actualSubleadElePt = subleadElePtVariation
+        dielectron = leadEle.p4(corr_pt=actualLeadElePt) + subleadEle.p4(corr_pt=actualSubleadElePt)
         if leadJet is not None:
             self.out.fillBranch('leadJetDieleDPhi', deltaPhi(leadJet.eta, dielectron.Phi()))
             self.out.fillBranch('leadJetDieleDEta', leadJet.eta - dielectron.Eta())
@@ -112,8 +128,16 @@ class vbfHeeProducer(Module):
             self.out.fillBranch('subleadJetDieleDPhi', self.variables.emptyVal)
             self.out.fillBranch('subleadJetDieleDEta', self.variables.emptyVal)
         if leadJet is not None and subleadJet is not None:
-            if not self.isData: dijet = leadJet.p4(corr_pt=leadJet.pt_nom) + subleadJet.p4(corr_pt=subleadJet.pt_nom)
-            else: dijet = leadJet.p4() + subleadJet.p4()
+            if self.isData: 
+                actualLeadJetPt = leadJet.pt
+                actualSubleadJetPt = subleadJet.pt
+            elif ptVariation is not None: 
+                actualLeadJetPt = leadJetPtVariation
+                actualSubleadJetPt = subleadJetPtVariation
+            else: 
+                actualLeadJetPt = leadJet.pt_nom
+                actualSubleadJetPt = subleadJet.pt_nom
+            dijet = leadJet.p4(corr_pt=actualLeadJetPt) + subleadJet.p4(corr_pt=actualSubleadJetPt)
             dijetAbsDEta = abs(leadJet.eta - subleadJet.eta)
             dijetDPhi = deltaPhi(leadJet.phi, subleadJet.phi)
             dijetZep = abs( dielectron.Eta() - 0.5*(leadJet.eta+subleadJet.eta) )
@@ -122,22 +146,24 @@ class vbfHeeProducer(Module):
             dijetDieleAbsDPhi = abs( deltaPhi(dijet.Phi(), dielectron.Phi()) )
             dijetDieleAbsDPhiTrunc = dijetDieleAbsDPhi if abs(dijetDieleAbsDPhi) < 3.1 else 3.1
             dijetDieleAbsDEta = abs(dijet.Eta() - dielectron.Eta())
-            self.out.fillBranch('dijetMass', dijet.M())
-            self.out.fillBranch('dijetPt', dijet.Pt())
-            self.out.fillBranch('dijetEta', dijet.Eta())
-            self.out.fillBranch('dijetPhi', dijet.Phi())
-            self.out.fillBranch('dijetAbsDEta', dijetAbsDEta)
-            self.out.fillBranch('dijetDPhi', dijetDPhi)
-            self.out.fillBranch('dijetCentrality', dijetCentrality)
-            self.out.fillBranch('dijetMinDRJetEle', dijetMinDRJetEle)
-            self.out.fillBranch('dijetDieleAbsDPhiTrunc', dijetDieleAbsDPhiTrunc)
-            self.out.fillBranch('dijetDieleAbsDEta', dijetDieleAbsDEta)
+            self.out.fillBranch('dijetMass%s', dijet.M(), variationName)
+            self.out.fillBranch('dijetPt%s', dijet.Pt(), variationName)
+            if variationName=='':
+                self.out.fillBranch('dijetEta', dijet.Eta())
+                self.out.fillBranch('dijetPhi', dijet.Phi())
+                self.out.fillBranch('dijetAbsDEta', dijetAbsDEta)
+                self.out.fillBranch('dijetDPhi', dijetDPhi)
+                self.out.fillBranch('dijetCentrality', dijetCentrality)
+                self.out.fillBranch('dijetMinDRJetEle', dijetMinDRJetEle)
+                self.out.fillBranch('dijetDieleAbsDPhiTrunc', dijetDieleAbsDPhiTrunc)
+                self.out.fillBranch('dijetDieleAbsDEta', dijetDieleAbsDEta)
 
             higgssystem = dielectron + dijet
-            self.out.fillBranch('higgssystemMass', higgssystem.M())
-            self.out.fillBranch('higgssystemPt', higgssystem.Pt())
-            self.out.fillBranch('higgssystemEta', higgssystem.Eta())
-            self.out.fillBranch('higgssystemPhi', higgssystem.Phi())
+            self.out.fillBranch('higgssystemMass%s', higgssystem.M(), variationName)
+            self.out.fillBranch('higgssystemPt%s', higgssystem.Pt(), variationName)
+            if variationName=='':
+                self.out.fillBranch('higgssystemEta', higgssystem.Eta())
+                self.out.fillBranch('higgssystemPhi', higgssystem.Phi())
         else:
             self.out.fillBranch('dijetMass', self.variables.emptyVal)
             self.out.fillBranch('dijetPt', self.variables.emptyVal)
@@ -196,6 +222,7 @@ class vbfHeeProducer(Module):
 
     def analyze(self, event):
         """process event, return True (go to next module) or False (fail, go to next event)"""
+        print 'ED DEBUG beginning analyse function'
         ## first apply trigger - now to both MC and data
         if not event.HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL: return False
 
@@ -237,9 +264,15 @@ class vbfHeeProducer(Module):
             self.fillElectron(subleadEle, 'sublead')
             self.fillElectron(subsubleadEle, 'subsublead')
 
+            ## to do: loop over these variations when filling the jet
             self.fillJet(leadJet, 'lead')
             self.fillJet(subleadJet, 'sublead')
             self.fillJet(subsubleadJet, 'subsublead')
+            for var in self.jetPtSystematics:
+                varLabel = '_%s'%var.split('_')[-1]
+                self.fillJet(leadJet, 'lead', getattr(leadJet,var), varLabel)
+                self.fillJet(subleadJet, 'sublead', getattr(leadJet,var), varLabel)
+                self.fillJet(subsubleadJet, 'subsublead', getattr(leadJet,var), varLabel)
 
             self.fillDielectron(leadEle, subleadEle) ## dielectron system
             self.fillDijet(leadEle, subleadEle, leadJet, subleadJet) ## dijet and dijet plus diphoton system
@@ -253,9 +286,12 @@ class vbfHeeProducer(Module):
             else: 
                 self.setWeightData()
 
+            print 'ED DEBUG exiting analyse function'
             return True
 
-        else: return False
+        else: 
+            print 'ED DEBUG exiting analyse function'
+            return False
 
 
 # define modules using the syntax 'name = lambda : constructor' to avoid having them loaded when not needed
