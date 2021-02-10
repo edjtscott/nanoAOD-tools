@@ -4,8 +4,6 @@ keep run
 keep luminosityBlock
 keep event
 keep HTXS*
-keep *Electron*
-keep *Jet*
 keep lead*
 keep sublead*
 keep subsublead*

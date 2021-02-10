@@ -213,7 +213,9 @@ class vbfHeeProducer(Module):
     def analyze(self, event):
         """process event, return True (go to next module) or False (fail, go to next event)"""
         ## first apply trigger - now to both MC and data
-        if not event.HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL: return False
+        if self.year=='2016' and not event.HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ: return False
+        if self.year=='2017' and not event.HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL: return False
+        if self.year=='2018' and not event.HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL: return False
 
         ## electron handling
         electrons = Collection(event, "Electron")

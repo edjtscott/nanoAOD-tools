@@ -2,4 +2,4 @@
 keep *
 drop HLT_*
 drop L1_*
-keep HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL
+keep HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL*

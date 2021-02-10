@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from collections import OrderedDict as od
+
 from optparse import OptionParser
 parser = OptionParser()
 parser.add_option("-r","--runPeriod",default="")
@@ -13,9 +15,13 @@ opts.runPeriod = str(opts.runPeriod)
 opts.year = str(opts.year)
 opts.outDir = str(opts.outDir)
 
+localFiles = od()
+localFiles['2016'] = [["root://cms-xrd-global.cern.ch//store/mc/RunIISummer19UL16NanoAODv2/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/106X_mcRun2_asymptotic_v15-v1/270000/4B797E90-02FF-C947-971E-1CB3DD10FD21.root"], ["root://cms-xrd-global.cern.ch//store/data/Run2016F/DoubleEG/NANOAOD/UL2016_MiniAODv1_NanoAODv2-v1/270000/E01ADECC-3419-964F-A9B6-169267AD1F3F.root"]]
+localFiles['2017'] = [["root://cms-xrd-global.cern.ch//store/mc/RunIISummer19UL17NanoAOD/GluGluHToEE_M125_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/106X_mc2017_realistic_v6-v1/00000/D1F68AEE-C601-1B43-8C4E-C2BEA41A5A45.root"], ["root://cms-xrd-global.cern.ch//store/data/Run2017B/DoubleEG/NANOAOD/UL2017_02Dec2019-v1/280000/9517812B-75C7-BF48-88E7-F5E4FB39210D.root"]]
+localFiles['2018'] = [["root://cms-xrd-global.cern.ch//store/mc/RunIISummer19UL18NanoAODv2/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/NANOAODSIM/106X_upgrade2018_realistic_v15_L1v1-v1/280000/2CDD6B0D-A334-6643-93FF-49BE63AD2945.root"], ["root://cms-xrd-global.cern.ch//store/data/Run2018B/EGamma/NANOAOD/UL2018_MiniAODv1_NanoAODv2-v1/280000/42FDD1DE-1795-8C4B-ACA9-40F823D0C9EB.root"]]
+
 if opts.files is None:
-    if not opts.isData: opts.files=["root://cms-xrd-global.cern.ch//store/mc/RunIISummer19UL17NanoAOD/GluGluHToEE_M125_TuneCP5_13TeV-amcatnloFXFX-pythia8/NANOAODSIM/106X_mc2017_realistic_v6-v1/00000/D1F68AEE-C601-1B43-8C4E-C2BEA41A5A45.root"]
-    else: opts.files=["root://cms-xrd-global.cern.ch//store/data/Run2017B/DoubleEG/NANOAOD/UL2017_02Dec2019-v1/280000/9517812B-75C7-BF48-88E7-F5E4FB39210D.root"]
+    opts.files = localFiles[opts.year][int(opts.isData)]
 else:
      opts.files = str(opts.files).split(',')
 
