@@ -87,8 +87,8 @@ class vbfHeeProducer(Module):
         dielectronDPhi = deltaPhi(leadEle.phi,subleadEle.phi)
         dielectronCosPhi= cos(dielectronDPhi)
         dielectronSigmaMoM = sqrt( (leadEle.energyErr/leadEle.p4(corr_pt=actualLeadPt).E())**2 + (subleadEle.energyErr/subleadEle.p4(corr_pt=actualSubleadPt).E())**2 )
-        self.out.fillBranch('leadElectronPtOvM%s'%variationName, leadEle.pt/dielectron.M())
-        self.out.fillBranch('subleadElectronPtOvM%s'%variationName, subleadEle.pt/dielectron.M())
+        self.out.fillBranch('leadElectronPtOvM%s'%variationName, actualLeadPt/dielectron.M())
+        self.out.fillBranch('subleadElectronPtOvM%s'%variationName, actualSubleadPt/dielectron.M())
         self.out.fillBranch('dielectronMass%s'%variationName, dielectron.M())
         self.out.fillBranch('dielectronPt%s'%variationName, dielectron.Pt())
         if variationName=='':
@@ -136,8 +136,8 @@ class vbfHeeProducer(Module):
             dijetDieleAbsDPhi = abs( deltaPhi(dijet.Phi(), dielectron.Phi()) )
             dijetDieleAbsDPhiTrunc = dijetDieleAbsDPhi if abs(dijetDieleAbsDPhi) < 3.1 else 3.1
             dijetDieleAbsDEta = abs(dijet.Eta() - dielectron.Eta())
-            self.out.fillBranch('dijetMass%s'%variationName, dijet.M())
-            self.out.fillBranch('dijetPt%s'%variationName, dijet.Pt())
+            if leadJetPtVariation is not None: self.out.fillBranch('dijetMass%s'%variationName, dijet.M())
+            if leadJetPtVariation is not None: self.out.fillBranch('dijetPt%s'%variationName, dijet.Pt())
             if variationName=='':
                 self.out.fillBranch('dijetEta', dijet.Eta())
                 self.out.fillBranch('dijetPhi', dijet.Phi())
@@ -251,15 +251,32 @@ class vbfHeeProducer(Module):
 
         ## perform event selection and fill variables
         if self.selectEvent(leadEle, subleadEle):
+            ## set electron info
             self.fillElectron(leadEle, 'lead')
             self.fillElectron(subleadEle, 'sublead')
             self.fillElectron(subsubleadEle, 'subsublead')
+            self.fillDielectron(leadEle, subleadEle) ## dielectron system
 
+            ## set jet info
             self.fillJet(leadJet, 'lead')
             self.fillJet(subleadJet, 'sublead')
             self.fillJet(subsubleadJet, 'subsublead')
-            self.fillDielectron(leadEle, subleadEle) ## dielectron system
             self.fillDijet(leadEle, subleadEle, leadJet, subleadJet) ## dijet and dijet plus diphoton system
+
+            ## electron systematics
+            self.fillElectron(leadEle, 'lead', 1.01*leadEle.pt, '_ElPtScaleUp')
+            self.fillElectron(leadEle, 'lead', 0.99*leadEle.pt, '_ElPtScaleDown')
+            self.fillElectron(subleadEle, 'sublead', 1.01*subleadEle.pt, '_ElPtScaleUp')
+            self.fillElectron(subleadEle, 'sublead', 0.99*subleadEle.pt, '_ElPtScaleDown')
+            if subsubleadEle is not None:
+                self.fillElectron(subsubleadEle, 'subsublead', 1.01*subsubleadEle.pt, '_ElPtScaleUp')
+                self.fillElectron(subsubleadEle, 'subsublead', 0.99*subsubleadEle.pt, '_ElPtScaleDown')
+            self.fillDielectron(leadEle, subleadEle, 1.01*leadEle.pt, 1.01*subleadEle.pt, '_ElPtScaleUp')
+            self.fillDielectron(leadEle, subleadEle, 0.99*leadEle.pt, 0.99*subleadEle.pt, '_ElPtScaleDown')
+            self.fillDijet(leadEle, subleadEle, leadJet, subleadJet, leadElePtVariation=1.01*leadEle.pt, subleadElePtVariation=1.01*subleadEle.pt, variationName='_ElPtScaleUp')
+            self.fillDijet(leadEle, subleadEle, leadJet, subleadJet, leadElePtVariation=0.99*leadEle.pt, subleadElePtVariation=0.99*subleadEle.pt, variationName='_ElPtScaleDown')
+
+            ## jet systematics
             for var in self.variables.jetPtSystematics:
                 varLabel = self.variables.getSystLabel(var)
                 if leadJet is not None: 
@@ -275,7 +292,6 @@ class vbfHeeProducer(Module):
                     self.fillJet(subsubleadJet, 'subsublead', getattr(subsubleadJet,var), varLabel)
                 else:
                     self.fillJet(subsubleadJet, 'subsublead', self.variables.emptyVal, varLabel)
-
 
             ## now set the event weight using the relevant factors
             if not self.isData:
