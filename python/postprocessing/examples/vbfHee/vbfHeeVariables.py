@@ -6,7 +6,7 @@ class VariableController():
         self.orders = orders
         self.objectVariables = ['En', 'Mass', 'Pt', 'Eta', 'Phi']
         self.electronVariables = ['IDMVA', 'SigmaE', 'Charge']
-        self.jetVariables = ['QGL', 'ID', 'PUJID', 'PtJerUp', 'PtJerDown', 'PtJecUp', 'PtJecDown']
+        self.jetVariables = ['QGL', 'ID', 'PUJID']
         self.eventVariables = ['leadJetDieleDPhi', 'leadJetDieleDEta', 'subleadJetDieleDPhi', 'subleadJetDieleDEta',
                                'dielectronMass', 'dielectronPt', 'dielectronEta', 'dielectronPhi', 'dielectronCosPhi', 'dielectronSigmaMoM', 'leadElectronPtOvM', 'subleadElectronPtOvM',
                                'dijetMass', 'dijetPt', 'dijetEta', 'dijetPhi', 'dijetAbsDEta', 'dijetDPhi', 'dijetMinDRJetEle', 'dijetCentrality', 'dijetDieleAbsDPhiTrunc', 'dijetDieleAbsDEta',
@@ -26,15 +26,23 @@ class VariableController():
                floats.append('%sElectron%s'%(order,var))
             for var in self.jetVariables:
                floats.append('%sJet%s'%(order,var))
+            for var in ['En', 'Mass', 'Pt']:
                for systVar in self.jetPtSystematics:
-                   floats.append('%sJet%s%s'%(order,var,systVar))
+                   floats.append('%sJet%s%s'%(order,var,self.getSystLabel(systVar)))
         for var in self.eventVariables:
            floats.append('%s'%(var))
+        for var in ['dijetMass', 'dijetPt', 'higgssystemMass', 'higgssystemPt']:
+            for systVar in self.jetPtSystematics:
+                varLabel = self.getSystLabel(systVar)
+                floats.append('%s%s'%(var, varLabel))
         return floats
 
     def allIntNames(self):
         ints = []
         return ints
+
+    def getSystLabel(self, name):
+        return '_%s'%name.split('_')[-1]
 
 
 vbfHeeVars = VariableController(orders = ['lead', 'sublead', 'subsublead'])
