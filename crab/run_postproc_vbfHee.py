@@ -28,14 +28,7 @@ else:
 from PhysicsTools.NanoAODTools.postprocessing.framework.postprocessor import PostProcessor
 from  PhysicsTools.NanoAODTools.postprocessing.examples.vbfHee.vbfHeeModule import vbfHeeModuleConstrData2016, vbfHeeModuleConstrData2017, vbfHeeModuleConstrData2018, vbfHeeModuleConstrMC2016, vbfHeeModuleConstrMC2017, vbfHeeModuleConstrMC2018
 
-from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jetmetUncertainties import jetmetUncertainties2016, jetmetUncertainties2017, jetmetUncertainties2018, jetmetUncertainties2018Data
-from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jetmetHelperRun2 import createJMECorrector
-## FIXME configure this and apply to both data and MC correctly
-jetmetUncertainties2017DataB = createJMECorrector(isMC=False, dataYear=2017, runPeriod="B")
-jetmetUncertainties2017DataC = createJMECorrector(isMC=False, dataYear=2017, runPeriod="C")
-jetmetUncertainties2017DataD = createJMECorrector(isMC=False, dataYear=2017, runPeriod="D")
-jetmetUncertainties2017DataE = createJMECorrector(isMC=False, dataYear=2017, runPeriod="E")
-jetmetUncertainties2017DataF = createJMECorrector(isMC=False, dataYear=2017, runPeriod="F")
+from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jetmetUncertainties import jetmetUncertainties2016, jetmetUncertainties2017, jetmetUncertainties2018
 
 from PhysicsTools.NanoAODTools.postprocessing.modules.common.PrefireCorr import PrefCorr
 from PhysicsTools.NanoAODTools.postprocessing.modules.common.puWeightProducer import puAutoWeight_2016, puAutoWeight_2017, puAutoWeight_2018
@@ -51,28 +44,14 @@ PrefireCorr2016 = lambda : PrefCorr("L1prefiring_jetpt_2016BtoH.root", "L1prefir
 PrefireCorr2017 = lambda : PrefCorr('L1prefiring_jetpt_2017BtoF.root', 'L1prefiring_jetpt_2017BtoF', 'L1prefiring_photonpt_2017BtoF.root', 'L1prefiring_photonpt_2017BtoF')
 
 theModules = []
-if opts.isData: 
-    if opts.year.count('2017'):
-        if opts.runPeriod.count('B'):
-            theModules += [jetmetUncertainties2017DataB]
-        elif opts.runPeriod.count('C'):
-            theModules += [jetmetUncertainties2017DataC]
-        elif opts.runPeriod.count('D'):
-            theModules += [jetmetUncertainties2017DataD]
-        elif opts.runPeriod.count('E'):
-            theModules += [jetmetUncertainties2017DataE]
-        elif opts.runPeriod.count('F'):
-            theModules += [jetmetUncertainties2017DataF]
-        theModules += [vbfHeeModuleConstrData2017]
-    elif opts.year.count('2018'):
-        theModules += [jetmetUncertainties2018Data, vbfHeeModuleConstrData2018]
+if opts.isData: theModules += [vbfHeeModuleConstrData2017]
 else:
     if opts.year.count('2016'):
-        theModules += [puAutoWeight_2016, jetmetUncertainties2016, PrefireCorr2016, muonScaleRes2016, vbfHeeModuleConstrMC2016]
+        theModules += [puAutoWeight_2016, jetmetUncertainties2016, PrefireCorr2016, vbfHeeModuleConstrMC2016]
     elif opts.year.count('2017'):
-        theModules += [puAutoWeight_2017, jetmetUncertainties2017, PrefireCorr2017, muonScaleRes2017, vbfHeeModuleConstrMC2017]
+        theModules += [puAutoWeight_2017, jetmetUncertainties2017, PrefireCorr2017, vbfHeeModuleConstrMC2017]
     elif opts.year.count('2018'):
-        theModules += [puAutoWeight_2018, jetmetUncertainties2018, muonScaleRes2018, vbfHeeModuleConstrMC2018]
+        theModules += [puAutoWeight_2018, jetmetUncertainties2018, vbfHeeModuleConstrMC2018]
 
 p=PostProcessor( opts.outDir,
                  opts.files,       
