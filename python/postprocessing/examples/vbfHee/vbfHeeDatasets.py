@@ -36,27 +36,27 @@ datas[2017] = ['/DoubleEG/Run2017B-UL2017_MiniAODv1_NanoAODv2-v1/NANOAOD',
               ]
 
 
-backgrounds['2016'] = ['/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer19UL16NanoAODv2-106X_mcRun2_asymptotic_v15-v1/NANOAODSIM',
-                       '/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/RunIISummer19UL16NanoAODv2-106X_mcRun2_asymptotic_v15-v1/NANOAODSIM', 
-                       '/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/RunIISummer19UL16NanoAODv2-106X_mcRun2_asymptotic_v15-v1/NANOAODSIM'
-                      ]
+backgrounds[2016] = ['/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer19UL16NanoAODv2-106X_mcRun2_asymptotic_v15-v1/NANOAODSIM',
+                     '/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/RunIISummer19UL16NanoAODv2-106X_mcRun2_asymptotic_v15-v1/NANOAODSIM', 
+                     '/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/RunIISummer19UL16NanoAODv2-106X_mcRun2_asymptotic_v15-v1/NANOAODSIM'
+                    ]
 
-datas['2016'] = ['/DoubleEG/Run2016B-UL2016_MiniAODv1_NanoAODv2-v1/NANOAOD',
-                 '/DoubleEG/Run2016C-UL2016_MiniAODv1_NanoAODv2-v1/NANOAOD',
-                 '/DoubleEG/Run2016D-UL2016_MiniAODv1_NanoAODv2-v1/NANOAOD',
-                 '/DoubleEG/Run2016E-UL2016_MiniAODv1_NanoAODv2-v1/NANOAOD',
-                 '/DoubleEG/Run2016F-UL2016_MiniAODv1_NanoAODv2-v1/NANOAOD',
-                 '/DoubleEG/Run2016G-UL2016_MiniAODv1_NanoAODv2-v1/NANOAOD',
-                 '/DoubleEG/Run2016H-UL2016_MiniAODv1_NanoAODv2-v1/NANOAOD'
-                ]
+datas[2016] = ['/DoubleEG/Run2016B-UL2016_MiniAODv1_NanoAODv2-v1/NANOAOD',
+               '/DoubleEG/Run2016C-UL2016_MiniAODv1_NanoAODv2-v1/NANOAOD',
+               '/DoubleEG/Run2016D-UL2016_MiniAODv1_NanoAODv2-v1/NANOAOD',
+               '/DoubleEG/Run2016E-UL2016_MiniAODv1_NanoAODv2-v1/NANOAOD',
+               '/DoubleEG/Run2016F-UL2016_MiniAODv1_NanoAODv2-v1/NANOAOD',
+               '/DoubleEG/Run2016G-UL2016_MiniAODv1_NanoAODv2-v1/NANOAOD',
+               '/DoubleEG/Run2016H-UL2016_MiniAODv1_NanoAODv2-v1/NANOAOD'
+              ]
 
 
-backgrounds['2018'] = ['/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer19UL18NanoAODv2-106X_upgrade2018_realistic_v15_L1v1-v1/NANOAODSIM',
-                       '/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/RunIISummer19UL18NanoAODv2-106X_upgrade2018_realistic_v15_L1v1-v1/NANOAODSIM',
-                       '/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/RunIISummer19UL18NanoAODv2-106X_upgrade2018_realistic_v15_L1v1-v1/NANOAODSIM'
-                      ]
+backgrounds[2018] = ['/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer19UL18NanoAODv2-106X_upgrade2018_realistic_v15_L1v1-v1/NANOAODSIM',
+                     '/TTTo2L2Nu_TuneCP5_13TeV-powheg-pythia8/RunIISummer19UL18NanoAODv2-106X_upgrade2018_realistic_v15_L1v1-v1/NANOAODSIM',
+                     '/TTToSemiLeptonic_TuneCP5_13TeV-powheg-pythia8/RunIISummer19UL18NanoAODv2-106X_upgrade2018_realistic_v15_L1v1-v1/NANOAODSIM'
+                    ]
 
-datas['2018'] = ['/EGamma/Run2018A-UL2018_MiniAODv1_NanoAODv2-v1/NANOAOD',
-                 '/EGamma/Run2018B-UL2018_MiniAODv1_NanoAODv2-v1/NANOAOD', ## FIXME why is Run C missing for UL 18?
-                 '/EGamma/Run2018D-UL2018_MiniAODv1_NanoAODv2-v1/NANOAOD'
-                ]
+datas[2018] = ['/EGamma/Run2018A-UL2018_MiniAODv1_NanoAODv2-v1/NANOAOD',
+               '/EGamma/Run2018B-UL2018_MiniAODv1_NanoAODv2-v1/NANOAOD', ## FIXME why is Run C missing for UL 18?
+               '/EGamma/Run2018D-UL2018_MiniAODv1_NanoAODv2-v1/NANOAOD'
+              ]

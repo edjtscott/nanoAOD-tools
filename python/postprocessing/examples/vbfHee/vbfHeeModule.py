@@ -263,35 +263,36 @@ class vbfHeeProducer(Module):
             self.fillJet(subsubleadJet, 'subsublead')
             self.fillDijet(leadEle, subleadEle, leadJet, subleadJet) ## dijet and dijet plus diphoton system
 
-            ## electron systematics
-            self.fillElectron(leadEle, 'lead', 1.01*leadEle.pt, '_ElPtScaleUp')
-            self.fillElectron(leadEle, 'lead', 0.99*leadEle.pt, '_ElPtScaleDown')
-            self.fillElectron(subleadEle, 'sublead', 1.01*subleadEle.pt, '_ElPtScaleUp')
-            self.fillElectron(subleadEle, 'sublead', 0.99*subleadEle.pt, '_ElPtScaleDown')
-            if subsubleadEle is not None:
-                self.fillElectron(subsubleadEle, 'subsublead', 1.01*subsubleadEle.pt, '_ElPtScaleUp')
-                self.fillElectron(subsubleadEle, 'subsublead', 0.99*subsubleadEle.pt, '_ElPtScaleDown')
-            self.fillDielectron(leadEle, subleadEle, 1.01*leadEle.pt, 1.01*subleadEle.pt, '_ElPtScaleUp')
-            self.fillDielectron(leadEle, subleadEle, 0.99*leadEle.pt, 0.99*subleadEle.pt, '_ElPtScaleDown')
-            self.fillDijet(leadEle, subleadEle, leadJet, subleadJet, leadElePtVariation=1.01*leadEle.pt, subleadElePtVariation=1.01*subleadEle.pt, variationName='_ElPtScaleUp')
-            self.fillDijet(leadEle, subleadEle, leadJet, subleadJet, leadElePtVariation=0.99*leadEle.pt, subleadElePtVariation=0.99*subleadEle.pt, variationName='_ElPtScaleDown')
+            if not self.isData:
+                ## electron systematics
+                self.fillElectron(leadEle, 'lead', 1.01*leadEle.pt, '_ElPtScaleUp')
+                self.fillElectron(leadEle, 'lead', 0.99*leadEle.pt, '_ElPtScaleDown')
+                self.fillElectron(subleadEle, 'sublead', 1.01*subleadEle.pt, '_ElPtScaleUp')
+                self.fillElectron(subleadEle, 'sublead', 0.99*subleadEle.pt, '_ElPtScaleDown')
+                if subsubleadEle is not None:
+                    self.fillElectron(subsubleadEle, 'subsublead', 1.01*subsubleadEle.pt, '_ElPtScaleUp')
+                    self.fillElectron(subsubleadEle, 'subsublead', 0.99*subsubleadEle.pt, '_ElPtScaleDown')
+                self.fillDielectron(leadEle, subleadEle, 1.01*leadEle.pt, 1.01*subleadEle.pt, '_ElPtScaleUp')
+                self.fillDielectron(leadEle, subleadEle, 0.99*leadEle.pt, 0.99*subleadEle.pt, '_ElPtScaleDown')
+                self.fillDijet(leadEle, subleadEle, leadJet, subleadJet, leadElePtVariation=1.01*leadEle.pt, subleadElePtVariation=1.01*subleadEle.pt, variationName='_ElPtScaleUp')
+                self.fillDijet(leadEle, subleadEle, leadJet, subleadJet, leadElePtVariation=0.99*leadEle.pt, subleadElePtVariation=0.99*subleadEle.pt, variationName='_ElPtScaleDown')
 
-            ## jet systematics
-            for var in self.variables.jetPtSystematics:
-                varLabel = self.variables.getSystLabel(var)
-                if leadJet is not None: 
-                    self.fillJet(leadJet, 'lead', getattr(leadJet,var), varLabel)
-                else:
-                    self.fillJet(leadJet, 'lead', self.variables.emptyVal, varLabel)
-                if subleadJet is not None: 
-                    self.fillJet(subleadJet, 'sublead', getattr(subleadJet,var), varLabel)
-                    self.fillDijet(leadEle, subleadEle, leadJet, subleadJet, leadJetPtVariation=getattr(leadJet,var), subleadJetPtVariation=getattr(subleadJet,var), variationName=varLabel)
-                else:
-                    self.fillJet(subleadJet, 'sublead', self.variables.emptyVal, varLabel)
-                if subsubleadJet is not None: 
-                    self.fillJet(subsubleadJet, 'subsublead', getattr(subsubleadJet,var), varLabel)
-                else:
-                    self.fillJet(subsubleadJet, 'subsublead', self.variables.emptyVal, varLabel)
+                ## jet systematics
+                for var in self.variables.jetPtSystematics:
+                    varLabel = self.variables.getSystLabel(var)
+                    if leadJet is not None: 
+                        self.fillJet(leadJet, 'lead', getattr(leadJet,var), varLabel)
+                    else:
+                        self.fillJet(leadJet, 'lead', self.variables.emptyVal, varLabel)
+                    if subleadJet is not None: 
+                        self.fillJet(subleadJet, 'sublead', getattr(subleadJet,var), varLabel)
+                        self.fillDijet(leadEle, subleadEle, leadJet, subleadJet, leadJetPtVariation=getattr(leadJet,var), subleadJetPtVariation=getattr(subleadJet,var), variationName=varLabel)
+                    else:
+                        self.fillJet(subleadJet, 'sublead', self.variables.emptyVal, varLabel)
+                    if subsubleadJet is not None: 
+                        self.fillJet(subsubleadJet, 'subsublead', getattr(subsubleadJet,var), varLabel)
+                    else:
+                        self.fillJet(subsubleadJet, 'subsublead', self.variables.emptyVal, varLabel)
 
             ## now set the event weight using the relevant factors
             if not self.isData:
@@ -309,12 +310,12 @@ class vbfHeeProducer(Module):
 
 
 # define modules using the syntax 'name = lambda : constructor' to avoid having them loaded when not needed
-from PhysicsTools.NanoAODTools.postprocessing.examples.vbfHee.vbfHeeVariables import vbfHeeVars
+from PhysicsTools.NanoAODTools.postprocessing.examples.vbfHee.vbfHeeVariables import vbfHeeVarsMC, vbfHeeVarsData
 jetThresh = 20.
 eleThresh = 25.
-vbfHeeModuleConstrData2016 = lambda: vbfHeeProducer(isData=True,  year=2016, jetSelection=lambda j: j.pt > jetThresh, eleSelection=lambda e: e.pt > eleThresh, variables = vbfHeeVars)
-vbfHeeModuleConstrMC2016   = lambda: vbfHeeProducer(isData=False, year=2016, jetSelection=lambda j: j.pt > jetThresh, eleSelection=lambda e: e.pt > eleThresh, variables = vbfHeeVars)
-vbfHeeModuleConstrData2017 = lambda: vbfHeeProducer(isData=True,  year=2017, jetSelection=lambda j: j.pt > jetThresh, eleSelection=lambda e: e.pt > eleThresh, variables = vbfHeeVars)
-vbfHeeModuleConstrMC2017   = lambda: vbfHeeProducer(isData=False, year=2017, jetSelection=lambda j: j.pt > jetThresh, eleSelection=lambda e: e.pt > eleThresh, variables = vbfHeeVars)
-vbfHeeModuleConstrData2018 = lambda: vbfHeeProducer(isData=True,  year=2018, jetSelection=lambda j: j.pt > jetThresh, eleSelection=lambda e: e.pt > eleThresh, variables = vbfHeeVars)
-vbfHeeModuleConstrMC2018   = lambda: vbfHeeProducer(isData=False, year=2018, jetSelection=lambda j: j.pt > jetThresh, eleSelection=lambda e: e.pt > eleThresh, variables = vbfHeeVars)
+vbfHeeModuleConstrData2016 = lambda: vbfHeeProducer(isData=True,  year=2016, jetSelection=lambda j: j.pt > jetThresh, eleSelection=lambda e: e.pt > eleThresh, variables = vbfHeeVarsData)
+vbfHeeModuleConstrMC2016   = lambda: vbfHeeProducer(isData=False, year=2016, jetSelection=lambda j: j.pt > jetThresh, eleSelection=lambda e: e.pt > eleThresh, variables = vbfHeeVarsMC)
+vbfHeeModuleConstrData2017 = lambda: vbfHeeProducer(isData=True,  year=2017, jetSelection=lambda j: j.pt > jetThresh, eleSelection=lambda e: e.pt > eleThresh, variables = vbfHeeVarsData)
+vbfHeeModuleConstrMC2017   = lambda: vbfHeeProducer(isData=False, year=2017, jetSelection=lambda j: j.pt > jetThresh, eleSelection=lambda e: e.pt > eleThresh, variables = vbfHeeVarsMC)
+vbfHeeModuleConstrData2018 = lambda: vbfHeeProducer(isData=True,  year=2018, jetSelection=lambda j: j.pt > jetThresh, eleSelection=lambda e: e.pt > eleThresh, variables = vbfHeeVarsData)
+vbfHeeModuleConstrMC2018   = lambda: vbfHeeProducer(isData=False, year=2018, jetSelection=lambda j: j.pt > jetThresh, eleSelection=lambda e: e.pt > eleThresh, variables = vbfHeeVarsMC)

@@ -30,6 +30,7 @@ from  PhysicsTools.NanoAODTools.postprocessing.examples.vbfHee.vbfHeeModule impo
 
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jetmetUncertainties import jetmetUncertainties2016, jetmetUncertainties2017, jetmetUncertainties2018, jetmetUncertainties2018Data
 from PhysicsTools.NanoAODTools.postprocessing.modules.jme.jetmetHelperRun2 import createJMECorrector
+## FIXME configure this and apply to both data and MC correctly
 jetmetUncertainties2017DataB = createJMECorrector(isMC=False, dataYear=2017, runPeriod="B")
 jetmetUncertainties2017DataC = createJMECorrector(isMC=False, dataYear=2017, runPeriod="C")
 jetmetUncertainties2017DataD = createJMECorrector(isMC=False, dataYear=2017, runPeriod="D")

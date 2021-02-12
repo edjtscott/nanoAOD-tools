@@ -5,10 +5,14 @@ from os import walk, path, chdir, system
 from collections import OrderedDict as od
 
 effaccs = od()
+effaccs['2016'] = od()
+effaccs['2017'] = od()
+effaccs['2018'] = od()
 
 for base, dirs, files in walk('Jobs'):
     if not base.count('sub_'): continue
     if base.count('Data'): continue
+    year = base.split('/')[1]
     sample = base.split('sub_')[1]
     numerSum = 0.
     denomSum = 0.
@@ -21,7 +25,9 @@ for base, dirs, files in walk('Jobs'):
                 if line.count('preselected entries from'): 
                     numerSum += float(line.split('Finally selected ')[1].split(' ')[0])
                     denomSum += float(line.split('root (')[1].split(' ')[0])
-    effaccs[sample] = numerSum / denomSum if denomSum > 0. else -999.
+    effaccs[year][sample] = numerSum / denomSum if denomSum > 0. else -999.
 
-for key,val in effaccs.iteritems():
-    print 'Sample %s has total eff*acc of %.7f'%(key,val)
+for year in effaccs.keys():
+    print 'Considering %s'%year
+    for key,val in effaccs[year].iteritems():
+        print 'Sample %s has total eff*acc of %.7f'%(key,val)

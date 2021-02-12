@@ -1,7 +1,8 @@
 ## define the list of variables to be computed and stored for VBF Hee analysis
 
 class VariableController():
-    def __init__(self, orders):
+    def __init__(self, orders, isData):
+        self.isData = isData
         assert isinstance(orders,list)
         self.orders = orders
         self.objectVariables = ['En', 'Mass', 'Pt', 'Eta', 'Phi']
@@ -27,21 +28,23 @@ class VariableController():
                floats.append('%sElectron%s'%(order,var))
             for var in self.jetVariables:
                floats.append('%sJet%s'%(order,var))
-            for var in ['En', 'Mass', 'Pt']:
-               for systVar in self.jetPtSystematics:
-                   floats.append('%sJet%s%s'%(order,var,self.getSystLabel(systVar)))
-               for systVar in self.elePtSystematics:
-                   floats.append('%sElectron%s%s'%(order,var,self.getSystLabel(systVar)))
+            if not self.isData:
+                for var in ['En', 'Mass', 'Pt']:
+                   for systVar in self.jetPtSystematics:
+                       floats.append('%sJet%s%s'%(order,var,self.getSystLabel(systVar)))
+                   for systVar in self.elePtSystematics:
+                       floats.append('%sElectron%s%s'%(order,var,self.getSystLabel(systVar)))
         for var in self.eventVariables:
            floats.append('%s'%(var))
-        for var in ['dijetMass', 'dijetPt', 'higgssystemMass', 'higgssystemPt']:
-            for systVar in self.jetPtSystematics:
-                varLabel = self.getSystLabel(systVar)
-                floats.append('%s%s'%(var, varLabel))
-        for var in ['leadElectronPtOvM', 'subleadElectronPtOvM', 'dielectronMass', 'dielectronPt', 'higgssystemMass', 'higgssystemPt']:
-            for systVar in self.elePtSystematics:
-                varLabel = self.getSystLabel(systVar)
-                floats.append('%s%s'%(var, varLabel))
+        if not self.isData:
+            for var in ['dijetMass', 'dijetPt', 'higgssystemMass', 'higgssystemPt']:
+                for systVar in self.jetPtSystematics:
+                    varLabel = self.getSystLabel(systVar)
+                    floats.append('%s%s'%(var, varLabel))
+            for var in ['leadElectronPtOvM', 'subleadElectronPtOvM', 'dielectronMass', 'dielectronPt', 'higgssystemMass', 'higgssystemPt']:
+                for systVar in self.elePtSystematics:
+                    varLabel = self.getSystLabel(systVar)
+                    floats.append('%s%s'%(var, varLabel))
         return floats
 
     def allIntNames(self):
@@ -52,4 +55,5 @@ class VariableController():
         return '_%s'%name.split('_')[-1]
 
 
-vbfHeeVars = VariableController(orders = ['lead', 'sublead', 'subsublead'])
+vbfHeeVarsMC   = VariableController(orders = ['lead', 'sublead', 'subsublead'], isData=False)
+vbfHeeVarsData = VariableController(orders = ['lead', 'sublead', 'subsublead'], isData=True)

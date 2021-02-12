@@ -30,7 +30,7 @@ def safe_das_query( search, cmd ):
     return output
 
 
-def processDataType( dsets, isSig, isBkg, isData, dry=False, filePrepend='root://cms-xrd-global.cern.ch/', baseOutDir='.'):
+def processDataType(year, dsets, isSig, isBkg, isData, dry=False, filePrepend='root://cms-xrd-global.cern.ch/', baseOutDir='.'):
     if sum( [int(isSig), int(isBkg), int(isData)] ) > 1: raise Exception('Can only be one of signal, background, or data!')
     procType = None
     if isSig: procType = 'Signal'
@@ -40,24 +40,24 @@ def processDataType( dsets, isSig, isBkg, isData, dry=False, filePrepend='root:/
         if isData: dsetName = '%s_%s'%(dset.split('/')[1],dset.split('/')[2])
         else: dsetName = dset.split('/')[1]
         print 'Processing the dataset %s'%dsetName
-        subDir = '%s/Jobs/%s/sub_%s'%(getcwd(), procType, dsetName)
+        subDir = '%s/Jobs/%g/%s/sub_%s'%(getcwd(), year, procType, dsetName)
         if not path.isdir(subDir): system('mkdir -p %s'%subDir)
         outDir = '%s/%s/%s'%(baseOutDir, procType, dsetName)
         if not path.isdir(outDir): system('mkdir -p %s'%outDir)
         fileData = safe_das_query('file dataset=%s'%dset, cmd='dasgoclient')['data']
         for iFile, fInfo in enumerate(fileData):
             fName = filePrepend+fInfo['file'][0]['name']
-            cmd = './run_postproc_vbfHee.py --files %s --outDir %s '%(fName, outDir)
+            cmd = './run_postproc_vbfHee.py --files %s --outDir %s -y %g'%(fName, outDir, year)
             if isData: 
               cmd += '--isData '
-              cmd += '--runPeriod %s '%filter( lambda run : dset.count(run), ['Run2017B', 'Run2017C', 'Run2017D', 'Run2017E', 'Run2017F'] )[0][-1]
+              cmd += '--runPeriod %s '%filter( lambda run : dset.count(run), ['Run2016B', 'Run2016C', 'Run2016D', 'Run2016E', 'Run2016F', 'Run2016G', 'Run2016H', 'Run2017B', 'Run2017C', 'Run2017D', 'Run2017E', 'Run2017F', 'Run2018A', 'Run2018B', 'Run2018C','Run2018D'] )[0][-1]
             submitJob( subDir, cmd, iFile, dryRun=dry )
 
 
 from optparse import OptionParser
 parser = OptionParser()
 parser.add_option("-d","--dryRun",action="store_true", default=False)
-parser.add_option("--year",type="int", default=2017)
+parser.add_option("-y","--year",type="int", default=2017)
 parser.add_option("--runData",action="store_true", default=False)
 parser.add_option("--runSig",action="store_true", default=False)
 parser.add_option("--runBkg",action="store_true", default=False)
@@ -67,8 +67,8 @@ baseOutDir = '%s/Outputs/Pass6/%g'%(getcwd(), opts.year)
 
 from  PhysicsTools.NanoAODTools.postprocessing.examples.vbfHee.vbfHeeDatasets import signals, backgrounds, datas
 
-if opts.runSig:  processDataType(dsets=signals[opts.year], isSig=True, isBkg=False, isData=False, dry = opts.dryRun, baseOutDir = baseOutDir)
+if opts.runSig:  processDataType(opts.year, dsets=signals[opts.year], isSig=True, isBkg=False, isData=False, dry = opts.dryRun, baseOutDir = baseOutDir)
 
-if opts.runBkg:  processDataType(dsets=backgrounds[opts.year], isSig=False, isBkg=True, isData=False, dry = opts.dryRun, baseOutDir = baseOutDir)
+if opts.runBkg:  processDataType(opts.year, dsets=backgrounds[opts.year], isSig=False, isBkg=True, isData=False, dry = opts.dryRun, baseOutDir = baseOutDir)
 
-if opts.runData: processDataType(dsets=datas[opts.year], isSig=False, isBkg=False, isData=True, dry = opts.dryRun, baseOutDir = baseOutDir)
+if opts.runData: processDataType(opts.year, dsets=datas[opts.year], isSig=False, isBkg=False, isData=True, dry = opts.dryRun, baseOutDir = baseOutDir)
