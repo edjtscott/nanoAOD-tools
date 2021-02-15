@@ -47,7 +47,7 @@ def processDataType(year, dsets, isSig, isBkg, isData, dry=False, filePrepend='r
         fileData = safe_das_query('file dataset=%s'%dset, cmd='dasgoclient')['data']
         for iFile, fInfo in enumerate(fileData):
             fName = filePrepend+fInfo['file'][0]['name']
-            cmd = './run_postproc_vbfHee.py --files %s --outDir %s -y %g'%(fName, outDir, year)
+            cmd = './run_postproc_vbfHee.py --files %s --outDir %s -y %g '%(fName, outDir, year)
             if isData: 
               cmd += '--isData '
               cmd += '--runPeriod %s '%filter( lambda run : dset.count(run), ['Run2016B', 'Run2016C', 'Run2016D', 'Run2016E', 'Run2016F', 'Run2016G', 'Run2016H', 'Run2017B', 'Run2017C', 'Run2017D', 'Run2017E', 'Run2017F', 'Run2018A', 'Run2018B', 'Run2018C','Run2018D'] )[0][-1]

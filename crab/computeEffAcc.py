@@ -31,3 +31,5 @@ for year in effaccs.keys():
     print 'Considering %s'%year
     for key,val in effaccs[year].iteritems():
         print 'Sample %s has total eff*acc of %.7f'%(key,val)
+
+print effaccs
