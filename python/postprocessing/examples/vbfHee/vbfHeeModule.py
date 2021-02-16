@@ -41,15 +41,19 @@ class vbfHeeProducer(Module):
             if self.isData or ptVariation is None: actualPt = ele.pt
             elif ptVariation is not None: actualPt = ptVariation
             theP4 = ele.p4(corr_pt=actualPt)
-            self.out.fillBranch("%sElectronEn%s"%(order,variationName), theP4.E())
-            self.out.fillBranch("%sElectronMass%s"%(order,variationName), theP4.M())
-            self.out.fillBranch("%sElectronPt%s"%(order,variationName), theP4.Pt())
-            if ptVariation is None:
+            if variationName=='':
+                self.out.fillBranch("%sElectronEn"%order, theP4.E())
+                self.out.fillBranch("%sElectronMass"%order, theP4.M())
+                self.out.fillBranch("%sElectronPt"%order, theP4.Pt())
                 self.out.fillBranch("%sElectronEta"%order, ele.eta)
                 self.out.fillBranch("%sElectronPhi"%order, ele.phi)
                 self.out.fillBranch("%sElectronIDMVA"%order, ele.mvaFall17V2Iso)
                 self.out.fillBranch("%sElectronSigmaE"%order, ele.energyErr)
                 self.out.fillBranch("%sElectronCharge"%order, ele.charge)
+            else:
+                self.out.fillBranch("%sElectronEn%s"%(order,variationName), theP4.E())
+                self.out.fillBranch("%sElectronMass%s"%(order,variationName), theP4.M())
+                self.out.fillBranch("%sElectronPt%s"%(order,variationName), theP4.Pt())
         else:
             for var in self.variables.electronVariables:
                 self.out.fillBranch("%sElectron%s"%(order,var), self.variables.emptyVal)
@@ -64,13 +68,20 @@ class vbfHeeProducer(Module):
             self.out.fillBranch("%sJetEn%s"%(order,variationName), jet.p4(corr_pt=actualPt).E())
             self.out.fillBranch("%sJetMass%s"%(order,variationName), jet.p4(corr_pt=actualPt).M())
             self.out.fillBranch("%sJetPt%s"%(order,variationName), actualPt)
-            if ptVariation is None:
+            if variationName=='':
+                self.out.fillBranch("%sJetEn"%order, jet.p4(corr_pt=actualPt).E())
+                self.out.fillBranch("%sJetMass"%order, jet.p4(corr_pt=actualPt).M())
+                self.out.fillBranch("%sJetPt"%order, actualPt)
                 self.out.fillBranch("%sJetEta"%order, jet.eta)
                 self.out.fillBranch("%sJetPhi"%order, jet.phi)
                 self.out.fillBranch("%sJetID"%order, jet.jetId)
                 self.out.fillBranch("%sJetPUJID"%order, jet.puId)
                 self.out.fillBranch("%sJetQGL"%order, jet.qgl)
-        elif ptVariation is None:
+            else:
+                self.out.fillBranch("%sJetEn%s"%(order,variationName), jet.p4(corr_pt=actualPt).E())
+                self.out.fillBranch("%sJetMass%s"%(order,variationName), jet.p4(corr_pt=actualPt).M())
+                self.out.fillBranch("%sJetPt%s"%(order,variationName), actualPt)
+        elif variationName=='':
             for var in self.variables.jetVariables:
                 self.out.fillBranch("%sJet%s"%(order,var), self.variables.emptyVal)
             for var in self.variables.objectVariables:
@@ -87,15 +98,20 @@ class vbfHeeProducer(Module):
         dielectronDPhi = deltaPhi(leadEle.phi,subleadEle.phi)
         dielectronCosPhi= cos(dielectronDPhi)
         dielectronSigmaMoM = sqrt( (leadEle.energyErr/leadEle.p4(corr_pt=actualLeadPt).E())**2 + (subleadEle.energyErr/subleadEle.p4(corr_pt=actualSubleadPt).E())**2 )
-        self.out.fillBranch('leadElectronPtOvM%s'%variationName, actualLeadPt/dielectron.M())
-        self.out.fillBranch('subleadElectronPtOvM%s'%variationName, actualSubleadPt/dielectron.M())
-        self.out.fillBranch('dielectronMass%s'%variationName, dielectron.M())
-        self.out.fillBranch('dielectronPt%s'%variationName, dielectron.Pt())
         if variationName=='':
+            self.out.fillBranch('leadElectronPtOvM', actualLeadPt/dielectron.M())
+            self.out.fillBranch('subleadElectronPtOvM', actualSubleadPt/dielectron.M())
+            self.out.fillBranch('dielectronMass', dielectron.M())
+            self.out.fillBranch('dielectronPt', dielectron.Pt())
             self.out.fillBranch('dielectronEta', dielectron.Eta())
             self.out.fillBranch('dielectronPhi', dielectron.Phi())
             self.out.fillBranch('dielectronCosPhi', dielectronCosPhi)
             self.out.fillBranch('dielectronSigmaMoM', dielectronSigmaMoM)
+        else:
+            self.out.fillBranch('leadElectronPtOvM%s'%variationName, actualLeadPt/dielectron.M())
+            self.out.fillBranch('subleadElectronPtOvM%s'%variationName, actualSubleadPt/dielectron.M())
+            self.out.fillBranch('dielectronMass%s'%variationName, dielectron.M())
+            self.out.fillBranch('dielectronPt%s'%variationName, dielectron.Pt())
 
     def fillDijet(self, leadEle, subleadEle, leadJet, subleadJet, leadElePtVariation=None, subleadElePtVariation=None, leadJetPtVariation=None, subleadJetPtVariation=None, variationName=''):
         if self.isData or variationName=='' or leadElePtVariation==None: 
@@ -136,9 +152,9 @@ class vbfHeeProducer(Module):
             dijetDieleAbsDPhi = abs( deltaPhi(dijet.Phi(), dielectron.Phi()) )
             dijetDieleAbsDPhiTrunc = dijetDieleAbsDPhi if abs(dijetDieleAbsDPhi) < 3.1 else 3.1
             dijetDieleAbsDEta = abs(dijet.Eta() - dielectron.Eta())
-            if leadJetPtVariation is not None: self.out.fillBranch('dijetMass%s'%variationName, dijet.M())
-            if leadJetPtVariation is not None: self.out.fillBranch('dijetPt%s'%variationName, dijet.Pt())
             if variationName=='':
+                self.out.fillBranch('dijetMass', dijet.M())
+                self.out.fillBranch('dijetPt', dijet.Pt())
                 self.out.fillBranch('dijetEta', dijet.Eta())
                 self.out.fillBranch('dijetPhi', dijet.Phi())
                 self.out.fillBranch('dijetAbsDEta', dijetAbsDEta)
@@ -147,13 +163,19 @@ class vbfHeeProducer(Module):
                 self.out.fillBranch('dijetMinDRJetEle', dijetMinDRJetEle)
                 self.out.fillBranch('dijetDieleAbsDPhiTrunc', dijetDieleAbsDPhiTrunc)
                 self.out.fillBranch('dijetDieleAbsDEta', dijetDieleAbsDEta)
+            elif leadJetPtVariation is not None: 
+                self.out.fillBranch('dijetMass%s'%variationName, dijet.M())
+                self.out.fillBranch('dijetPt%s'%variationName, dijet.Pt())
 
             higgssystem = dielectron + dijet
-            self.out.fillBranch('higgssystemMass%s'%variationName, higgssystem.M())
-            self.out.fillBranch('higgssystemPt%s'%variationName, higgssystem.Pt())
             if variationName=='':
+                self.out.fillBranch('higgssystemMass%s'%variationName, higgssystem.M())
+                self.out.fillBranch('higgssystemPt%s'%variationName, higgssystem.Pt())
                 self.out.fillBranch('higgssystemEta', higgssystem.Eta())
                 self.out.fillBranch('higgssystemPhi', higgssystem.Phi())
+            else:
+                self.out.fillBranch('higgssystemMass%s'%variationName, higgssystem.M())
+                self.out.fillBranch('higgssystemPt%s'%variationName, higgssystem.Pt())
         elif variationName=='':
             self.out.fillBranch('dijetMass', self.variables.emptyVal)
             self.out.fillBranch('dijetPt', self.variables.emptyVal)
