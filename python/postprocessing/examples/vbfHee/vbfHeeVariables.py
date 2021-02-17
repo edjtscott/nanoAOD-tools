@@ -41,7 +41,7 @@ class VariableController():
                 for systVar in self.jetPtSystematics:
                     varLabel = self.getSystLabel(systVar)
                     floats.append('%s%s'%(var, varLabel))
-            for var in ['leadElectronPtOvM', 'subleadElectronPtOvM', 'dielectronMass', 'dielectronPt', 'higgssystemMass', 'higgssystemPt']:
+            for var in ['leadElectronPtOvM', 'subleadElectronPtOvM', 'dielectronMass', 'dielectronPt', 'dijetMass', 'dijetPt', 'higgssystemMass', 'higgssystemPt']:
                 for systVar in self.elePtSystematics:
                     varLabel = self.getSystLabel(systVar)
                     floats.append('%s%s'%(var, varLabel))

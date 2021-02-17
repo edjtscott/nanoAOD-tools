@@ -54,20 +54,21 @@ class vbfHeeProducer(Module):
                 self.out.fillBranch("%sElectronEn%s"%(order,variationName), theP4.E())
                 self.out.fillBranch("%sElectronMass%s"%(order,variationName), theP4.M())
                 self.out.fillBranch("%sElectronPt%s"%(order,variationName), theP4.Pt())
-        else:
+        elif variationName=='':
             for var in self.variables.electronVariables:
                 self.out.fillBranch("%sElectron%s"%(order,var), self.variables.emptyVal)
             for var in self.variables.objectVariables:
                 self.out.fillBranch("%sElectron%s"%(order,var), self.variables.emptyVal)
+        else:
+            self.out.fillBranch("%sElectronEn%s"%(order,variationName), self.variables.emptyVal)
+            self.out.fillBranch("%sElectronMass%s"%(order,variationName), self.variables.emptyVal)
+            self.out.fillBranch("%sElectronPt%s"%(order,variationName), self.variables.emptyVal)
 
     def fillJet(self, jet, order, ptVariation=None, variationName=''):
         if jet is not None:
             if self.isData: actualPt = jet.pt
             elif ptVariation is not None: actualPt = ptVariation
             else: actualPt = jet.pt_nom
-            self.out.fillBranch("%sJetEn%s"%(order,variationName), jet.p4(corr_pt=actualPt).E())
-            self.out.fillBranch("%sJetMass%s"%(order,variationName), jet.p4(corr_pt=actualPt).M())
-            self.out.fillBranch("%sJetPt%s"%(order,variationName), actualPt)
             if variationName=='':
                 self.out.fillBranch("%sJetEn"%order, jet.p4(corr_pt=actualPt).E())
                 self.out.fillBranch("%sJetMass"%order, jet.p4(corr_pt=actualPt).M())
@@ -86,6 +87,10 @@ class vbfHeeProducer(Module):
                 self.out.fillBranch("%sJet%s"%(order,var), self.variables.emptyVal)
             for var in self.variables.objectVariables:
                 self.out.fillBranch("%sJet%s"%(order,var), self.variables.emptyVal)
+        else:
+            self.out.fillBranch("%sJetEn%s"%(order,variationName), self.variables.emptyVal)
+            self.out.fillBranch("%sJetMass%s"%(order,variationName), self.variables.emptyVal)
+            self.out.fillBranch("%sJetPt%s"%(order,variationName), self.variables.emptyVal)
 
     def fillDielectron(self, leadEle, subleadEle, leadPtVariation=None, subleadPtVariation=None, variationName=''):
         if self.isData or variationName=='': 
@@ -163,14 +168,14 @@ class vbfHeeProducer(Module):
                 self.out.fillBranch('dijetMinDRJetEle', dijetMinDRJetEle)
                 self.out.fillBranch('dijetDieleAbsDPhiTrunc', dijetDieleAbsDPhiTrunc)
                 self.out.fillBranch('dijetDieleAbsDEta', dijetDieleAbsDEta)
-            elif leadJetPtVariation is not None: 
+            else:
                 self.out.fillBranch('dijetMass%s'%variationName, dijet.M())
                 self.out.fillBranch('dijetPt%s'%variationName, dijet.Pt())
 
             higgssystem = dielectron + dijet
             if variationName=='':
-                self.out.fillBranch('higgssystemMass%s'%variationName, higgssystem.M())
-                self.out.fillBranch('higgssystemPt%s'%variationName, higgssystem.Pt())
+                self.out.fillBranch('higgssystemMass', higgssystem.M())
+                self.out.fillBranch('higgssystemPt', higgssystem.Pt())
                 self.out.fillBranch('higgssystemEta', higgssystem.Eta())
                 self.out.fillBranch('higgssystemPhi', higgssystem.Phi())
             else:
@@ -192,6 +197,11 @@ class vbfHeeProducer(Module):
             self.out.fillBranch('higgssystemPt', self.variables.emptyVal)
             self.out.fillBranch('higgssystemEta', self.variables.emptyVal)
             self.out.fillBranch('higgssystemPhi', self.variables.emptyVal)
+        else:
+            self.out.fillBranch('dijetMass%s'%variationName, self.variables.emptyVal)
+            self.out.fillBranch('dijetPt%s'%variationName, self.variables.emptyVal)
+            self.out.fillBranch('higgssystemMass%s'%variationName, self.variables.emptyVal)
+            self.out.fillBranch('higgssystemPt%s'%variationName, self.variables.emptyVal)
 
     def selectElectron(self, ele):
         if not ele.mvaFall17V2Iso_WP90: return False
@@ -240,10 +250,10 @@ class vbfHeeProducer(Module):
         if self.year=='2018' and not event.HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL: return False
 
         ## electron handling
-        electrons = Collection(event, "Electron")
         leadEle = None
         subleadEle = None
         subsubleadEle = None
+        electrons = Collection(event, "Electron")
         for ele in filter(self.eleSel, electrons):
             if not self.selectElectron(ele): continue ## apply a fairly loose electron selection
             if leadEle is None:
@@ -253,26 +263,27 @@ class vbfHeeProducer(Module):
             elif subsubleadEle is None:
                 subsubleadEle = ele
 
-        ## jet handling
-        leadJet = None
-        subleadJet = None
-        subsubleadJet = None
-        jets = Collection(event, "Jet")
-        for jet in filter(self.jetSel, jets):
-            if leadEle is not None:
-                if jet.DeltaR(leadEle) < 0.4: continue
-            if subleadEle is not None:
-                if jet.DeltaR(subleadEle) < 0.4: continue
-            if not self.selectJet(jet): continue ## apply a fairly loose jet selection
-            if leadJet is None:
-                leadJet = jet
-            elif subleadJet is None:
-                subleadJet = jet
-            elif subsubleadJet is None:
-                subsubleadJet = jet
-
         ## perform event selection and fill variables
         if self.selectEvent(leadEle, subleadEle):
+
+            ## jet handling
+            leadJet = None
+            subleadJet = None
+            subsubleadJet = None
+            jets = Collection(event, "Jet")
+            for jet in filter(self.jetSel, jets):
+                if leadEle is not None:
+                    if jet.DeltaR(leadEle) < 0.4: continue
+                if subleadEle is not None:
+                    if jet.DeltaR(subleadEle) < 0.4: continue
+                if not self.selectJet(jet): continue ## apply a fairly loose jet selection
+                if leadJet is None:
+                    leadJet = jet
+                elif subleadJet is None:
+                    subleadJet = jet
+                elif subsubleadJet is None:
+                    subsubleadJet = jet
+
             ## set electron info
             self.fillElectron(leadEle, 'lead')
             self.fillElectron(subleadEle, 'sublead')
@@ -294,6 +305,9 @@ class vbfHeeProducer(Module):
                 if subsubleadEle is not None:
                     self.fillElectron(subsubleadEle, 'subsublead', 1.01*subsubleadEle.pt, '_ElPtScaleUp')
                     self.fillElectron(subsubleadEle, 'subsublead', 0.99*subsubleadEle.pt, '_ElPtScaleDown')
+                else:
+                    self.fillElectron(subsubleadEle, 'subsublead', variationName='_ElPtScaleUp')
+                    self.fillElectron(subsubleadEle, 'subsublead', variationName='_ElPtScaleDown')
                 self.fillDielectron(leadEle, subleadEle, 1.01*leadEle.pt, 1.01*subleadEle.pt, '_ElPtScaleUp')
                 self.fillDielectron(leadEle, subleadEle, 0.99*leadEle.pt, 0.99*subleadEle.pt, '_ElPtScaleDown')
                 self.fillDijet(leadEle, subleadEle, leadJet, subleadJet, leadElePtVariation=1.01*leadEle.pt, subleadElePtVariation=1.01*subleadEle.pt, variationName='_ElPtScaleUp')
@@ -305,16 +319,17 @@ class vbfHeeProducer(Module):
                     if leadJet is not None: 
                         self.fillJet(leadJet, 'lead', getattr(leadJet,var), varLabel)
                     else:
-                        self.fillJet(leadJet, 'lead', self.variables.emptyVal, varLabel)
+                        self.fillJet(leadJet, 'lead', variationName=varLabel)
                     if subleadJet is not None: 
                         self.fillJet(subleadJet, 'sublead', getattr(subleadJet,var), varLabel)
                         self.fillDijet(leadEle, subleadEle, leadJet, subleadJet, leadJetPtVariation=getattr(leadJet,var), subleadJetPtVariation=getattr(subleadJet,var), variationName=varLabel)
                     else:
-                        self.fillJet(subleadJet, 'sublead', self.variables.emptyVal, varLabel)
+                        self.fillJet(subleadJet, 'sublead', variationName=varLabel)
+                        self.fillDijet(leadEle, subleadEle, leadJet, subleadJet, variationName=varLabel)
                     if subsubleadJet is not None: 
                         self.fillJet(subsubleadJet, 'subsublead', getattr(subsubleadJet,var), varLabel)
                     else:
-                        self.fillJet(subsubleadJet, 'subsublead', self.variables.emptyVal, varLabel)
+                        self.fillJet(subsubleadJet, 'subsublead', variationName=varLabel)
 
             ## now set the event weight using the relevant factors
             if not self.isData:
