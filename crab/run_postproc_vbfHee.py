@@ -44,7 +44,13 @@ PrefireCorr2016 = lambda : PrefCorr("L1prefiring_jetpt_2016BtoH.root", "L1prefir
 PrefireCorr2017 = lambda : PrefCorr('L1prefiring_jetpt_2017BtoF.root', 'L1prefiring_jetpt_2017BtoF', 'L1prefiring_photonpt_2017BtoF.root', 'L1prefiring_photonpt_2017BtoF')
 
 theModules = []
-if opts.isData: theModules += [vbfHeeModuleConstrData2017]
+if opts.isData: 
+    if opts.year.count('2016'):
+        theModules += [vbfHeeModuleConstrData2016]
+    elif opts.year.count('2017'):
+        theModules += [vbfHeeModuleConstrData2017]
+    elif opts.year.count('2018'):
+        theModules += [vbfHeeModuleConstrData2018]
 else:
     if opts.year.count('2016'):
         theModules += [puAutoWeight_2016, jetmetUncertainties2016, PrefireCorr2016, vbfHeeModuleConstrMC2016]

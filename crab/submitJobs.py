@@ -63,7 +63,7 @@ parser.add_option("--runSig",action="store_true", default=False)
 parser.add_option("--runBkg",action="store_true", default=False)
 (opts,args) = parser.parse_args()
 
-baseOutDir = '%s/Outputs/Pass7/%g'%(getcwd(), opts.year)
+baseOutDir = '%s/Outputs/Pass8/%g'%(getcwd(), opts.year)
 
 from  PhysicsTools.NanoAODTools.postprocessing.examples.vbfHee.vbfHeeDatasets import signals, backgrounds, datas
 
